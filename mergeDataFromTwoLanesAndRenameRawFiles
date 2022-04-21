@@ -13,6 +13,8 @@ import glob
 import sys
 import os
 
+os.system(f"mkdir -p {output_directory}")
+
 lane1_files = glob.glob(f"{lane1_directory}/*gz")
 lane2_files = glob.glob(f"{lane2_directory}/*gz")
 
@@ -30,4 +32,5 @@ for filepath in lane1_files:
         output_filename = f"{output_directory}/{filename.split('_')[0]}_2.fastq.gz"
     
     cmd = f"cat {filepath_lane1} {filepath_lane2} > {output_filename}"
+    print(f"Executing {cmd}")
     os.system(cmd)
