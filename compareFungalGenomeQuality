@@ -219,9 +219,6 @@ def main():
             cmd = f"cp -r {options.temp_directory}/star_indices/{genome_reference.split('/')[-1]} {options.output_directory}/star_indices/"
             os.system(cmd)
         
-        # Remove the copied reference
-        cmd = f"rm {options.output_directory}/{genome_reference.split('/')[-1]}"
-        os.system(cmd)
         ################################################################################################################################################################################################################################################
         
         ################################################################################################################################################################################################################################################
@@ -229,7 +226,6 @@ def main():
         ################################################################################################################################################################################################################################################
         
         for sample in options.pe_reads:
-            
             
             # Copy raw data to output directory
             cmd = f"cp {sample}_1.fastq.gz {options.output_directory}/alignments/"
@@ -267,7 +263,7 @@ def main():
                                       volumes = volumes_list,
                                       command = cmd, 
                                       cpus = options.cpu, 
-                                      memory = '50g')
+                                      memory = '100g')
             os.system(f"rm {options.output_directory}/alignments/{sample.split('/')[-1]}_1.fastq.gz {options.output_directory}/alignments/{sample.split('/')[-1]}_2.fastq.gz")
             
             if options.transfer:
