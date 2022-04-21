@@ -6,7 +6,7 @@
 ##SBATCH --partition=priority-mem768
 #SBATCH --qos=maizegdb
 #SBATCH --mem=100G
-#SBATCH --time=2:00:00
+#SBATCH --time=7-00:00:00
 #SBATCH --job-name="Fungal_Genome_Quality_Comparison"
 #SBATCH --mail-user=sagnik@iastate.edu
 #SBATCH --mail-type=BEGIN
