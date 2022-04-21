@@ -193,7 +193,7 @@ def main():
             else:
                 software = "star"
                 version = list_of_softwares_with_versions[software]
-                runSingularityCommand(logging, "STAR", version, image_location = f"{options.output_directory}/singularity_images/{software}_{version}.sif", container_name = f"star_genomegenerate_{genome_reference.split('/')[-1]}", volumes = volumes_list,command = cmd, cpus = options.cpu, memory = '50g')
+                runSingularityCommand(logging, "STAR", version, image_location = f"{options.output_directory}/singularity_images/{software}:{version}", container_name = f"star_genomegenerate_{genome_reference.split('/')[-1]}", volumes = volumes_list,command = cmd, cpus = options.cpu, memory = '50g')
             
             # Move the star index to the temp directory if a transfer is requested
             if (options.transfer):
