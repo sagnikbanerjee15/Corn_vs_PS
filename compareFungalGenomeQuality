@@ -29,7 +29,7 @@ def parseCommandLineArguments():
     ##################################################################################################
     required_named.add_argument( "-metadata", "--metadata", help = "Enter the metadata file. The file format should be same as ListOfNCBI-SRASamplesForExperimentST.csv", required = True )
     required_named.add_argument( "-output_directory", "--output_directory", help = "Enter the name of the output directory. all analysis will be stored here. Please make sure you have sufficient space on your disk to reproduce all the analysis", required = True )
-    required_named.add_argument( "-genome_references", "--genome_references", help = "Enter the genome references. Please make sure the contigs/scaffolds of each reference is present in a single file", required = True)
+    required_named.add_argument( "-genome_references", "--genome_references", help = "Enter the genome references. Please make sure the contigs/scaffolds of each reference is present in a single file", nargs = '+')
 
     ##################################################################################################
     # Optional arguments
