@@ -183,7 +183,7 @@ def main():
             cmd += f" --runMode genomeGenerate "
             cmd += f" --runThreadN {options.cpu} "
             cmd += f" --genomeFastaFiles {options.output_directory}/{genome_reference.split('/')[-1]} "
-            cmd += f" --genomeDir {options.output_directory}/star_indices/{genome_reference.split('/')[-1]} "
+            cmd += f" --genomeDir {options.output_directory}/{genome_reference.split('/')[-1]} "
             cmd += f" --genomeSAindexNbases {min(14, math.log2(total_length)/2 - 1)}"
             cmd += f" --genomeChrBinNbits {min(18, math.log2(total_length/number_of_references))}"
             cmd += f" 1> {options.output_directory}/star_indices/{genome_reference.split('/')[-1]}.output "
