@@ -5,9 +5,13 @@
 # samples are paired ended
 ################################################################################################################################################################
 
-lane1_directory = "/90daydata/maizegdb/sagnik/Corn_vs_PS/data/lane1"
-lane2_directory = "/90daydata/maizegdb/sagnik/Corn_vs_PS/data/lane2"
-output_directory = "/90daydata/maizegdb/sagnik/Corn_vs_PS/data/merged"
+lane1_directory = "/90daydata/maizegdb/sagnik/CORN_VS_PS/data/S2/lane1"
+lane2_directory = "/90daydata/maizegdb/sagnik/CORN_VS_PS/data/S2/lane2"
+output_directory = "/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2"
+
+lane1_directory = "/90daydata/maizegdb/sagnik/CORN_VS_PS/data/SP/lane1"
+lane2_directory = "/90daydata/maizegdb/sagnik/CORN_VS_PS/data/SP/lane2"
+output_directory = "/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/SP"
 
 import glob
 import sys
@@ -31,5 +35,6 @@ for filepath in lane1_files:
     else:
         output_filename = f"{output_directory}/{filename.split('_')[0]}_2.fastq.gz"
     
-    cmd = f"cat {filepath_lane1} {filepath_lane2} > {output_filename}"
-    os.system(cmd)
+    if os.path.exists(output_filename) == False:
+        cmd = f"cat {filepath_lane1} {filepath_lane2} > {output_filename}"
+        os.system(cmd)

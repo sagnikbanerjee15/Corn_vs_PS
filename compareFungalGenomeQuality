@@ -27,7 +27,7 @@ def parseCommandLineArguments():
     ##################################################################################################
     # Required arguments
     ##################################################################################################
-    required_named.add_argument( "-metadata", "--metadata", help = "Enter the metadata file. The file format should be same as ListOfNCBI-SRASamplesForExperimentST.csv", required = True )
+    required_named.add_argument( "-pe_reads", "--pe_reads", help = "Enter the location of the PE reads", nargs = '+')
     required_named.add_argument( "-output_directory", "--output_directory", help = "Enter the name of the output directory. all analysis will be stored here. Please make sure you have sufficient space on your disk to reproduce all the analysis", required = True )
     required_named.add_argument( "-genome_references", "--genome_references", help = "Enter the genome references. Please make sure the contigs/scaffolds of each reference is present in a single file", nargs = '+')
 
@@ -156,14 +156,19 @@ def main():
     
     # Create output directory
     os.system(f"mkdir -p {options.output_directory}/star_indices")
+    os.system(f"mkdir -p {options.output_directory}/alignments/")
     
     # Create temporary directory and subdirectories
     os.system(f"mkdir -p {options.temp_directory}/star_indices")
+    os.system(f"mkdir -p {options.temp_directory}/alignments/")
     
-    ################################################################################################################################################################################################################################################
-    # Prepare STAR references
-    ################################################################################################################################################################################################################################################
+    
     for genome_reference in options.genome_references:
+        
+        ################################################################################################################################################################################################################################################
+        # Prepare STAR references
+        ################################################################################################################################################################################################################################################
+        
         # Copy the genome reference to output directory
         cmd = f"cp {genome_reference} {options.output_directory}"
         os.system(cmd)
@@ -193,7 +198,15 @@ def main():
             else:
                 software = "star"
                 version = list_of_softwares_with_versions[software]
-                runSingularityCommand(logging, "STAR", version, image_location = f"{options.output_directory}/singularity_images/{software}:{version}", container_name = f"star_genomegenerate_{genome_reference.split('/')[-1]}", volumes = volumes_list,command = cmd, cpus = options.cpu, memory = '50g')
+                runSingularityCommand(logging, 
+                                      "STAR", 
+                                      version, 
+                                      image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                                      container_name = f"star_genomegenerate_{genome_reference.split('/')[-1]}", 
+                                      volumes = volumes_list,
+                                      command = cmd, 
+                                      cpus = options.cpu, 
+                                      memory = '50g')
             
             # Move the star index to the temp directory if a transfer is requested
             if (options.transfer):
@@ -204,11 +217,50 @@ def main():
             cmd = f"cp -r {options.temp_directory}/star_indices/{genome_reference.split('/')[-1]} {options.output_directory}/star_indices/"
             os.system(cmd)
         
-        """
         # Remove the copied reference
         cmd = f"rm {options.output_directory}/{genome_reference.split('/')[-1]}"
         os.system(cmd)
-        """ 
+        ################################################################################################################################################################################################################################################
+        
+        ################################################################################################################################################################################################################################################
+        # Align the short reads - no need to perform trimming
+        ################################################################################################################################################################################################################################################
+        
+        for sample in options.pe_reads:
+            
+            cmd = ""
+            cmd += f" STAR "
+            cmd += f" --readFilesIn {sample}_1.fastq {sample}_2.fastq "
+            cmd += f" --outSAMtype SAM Unsorted "
+            cmd += f" --outFilterMultimapNmax 10000 " 
+            cmd += f" --alignIntronMin 20  "
+            cmd += f" --alignIntronMax 10000 "
+            cmd += f" --limitBAMsortRAM 107374182400 "
+            cmd += f" --alignEndsType Local " # ALLOWS soft clipping 
+            cmd += f" --outSAMprimaryFlag AllBestScore "
+            cmd += f" --outFilterScoreMinOverLread 0.7 "
+            cmd += f" --outFilterMatchNminOverLread 0.7 "
+            cmd += f" --outSAMattributes NH HI AS nM NM MD jM jI XS "
+            cmd += f" --alignSJoverhangMin 8 " 
+            cmd += f" --outFileNamePrefix {options.output_directory}/alignments/{sample}_"
+            if framework_of_choice == "docker":
+                pass
+            else:
+                software = "star"
+                version = list_of_softwares_with_versions[software]
+                runSingularityCommand(logging, 
+                                      "STAR", 
+                                      version, 
+                                      image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                                      container_name = f"star_mapping_{genome_reference.split('/')[-1]}", 
+                                      volumes = volumes_list,
+                                      command = cmd, 
+                                      cpus = options.cpu, 
+                                      memory = '50g')
+            
+            if options.transfer:
+                cmd = f"mv {options.output_directory}/alignments/{sample}_* {options.temp_directory}/alignments/"
+                os.system(cmd)
 
 
 if __name__ == "__main__":

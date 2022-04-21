@@ -19,7 +19,7 @@ module load singularity
 
 ROOT_DIR="/project/maizegdb/sagnik/CORN_VS_PS"
 TEMP_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS"
-REF_DIR="/90daydata/maizegdb/sagnik/Corn_vs_PS/data/reference"
+REF_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS/data/reference"
 
 ${ROOT_DIR}/Corn_vs_PS/compareFungalGenomeQuality \
 --metadata dummy \
@@ -29,5 +29,6 @@ ${ROOT_DIR}/Corn_vs_PS/compareFungalGenomeQuality \
 --temp_directory ${TEMP_DIR}/Fungal_Genome_Quality_Comparison \
 --transfer \
 --framework singularity \
+--pe_reads ${TEMP_DIR}/data/merged/S2/113  ${TEMP_DIR}/data/merged/S2/114 ${TEMP_DIR}/data/merged/S2/115 ${TEMP_DIR}/data/merged/S2/116 ${TEMP_DIR}/data/merged/S2/117 ${TEMP_DIR}/data/merged/S2/118 ${TEMP_DIR}/data/merged/S2/119 ${TEMP_DIR}/data/merged/S2/120 ${TEMP_DIR}/data/merged/S2/121 ${TEMP_DIR}/data/merged/S2/122 \
 1> ${ROOT_DIR}/data/Fungal_Genome_Quality_Comparison.output \
 2> ${ROOT_DIR}/data/Fungal_Genome_Quality_Comparison.error
