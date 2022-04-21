@@ -261,6 +261,11 @@ def main():
             if options.transfer:
                 cmd = f"mv {options.output_directory}/alignments/{sample}_* {options.temp_directory}/alignments/"
                 os.system(cmd)
+        
+        # Remove reference after mapping is complete
+        if options.transfer:
+            cmd = f"rm {options.output_directory}/star_indices/{genome_reference.split('/')[-1]}"
+            os.system(cmd)
 
 
 if __name__ == "__main__":
