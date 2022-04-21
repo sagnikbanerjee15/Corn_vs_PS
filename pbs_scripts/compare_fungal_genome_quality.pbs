@@ -19,11 +19,12 @@ module load singularity
 
 ROOT_DIR="/project/maizegdb/sagnik/CORN_VS_PS"
 TEMP_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS"
+REF_DIR="/90daydata/maizegdb/sagnik/Corn_vs_PS/data/reference"
 
 ${ROOT_DIR}/Corn_vs_PS/compareFungalGenomeQuality \
 --metadata dummy \
 --output_directory ${ROOT_DIR}/data/Fungal_Genome_Quality_Comparison \
---genome_references \
+--genome_references ${REF_DIR}/Argentina_PS.fa ${REF_DIR}/CR-IA16-P.sorghi-genome/SALSA/salsa_phase_hic.fasta ${REF_DIR}/CR-IA16-P.sorghi-genome/flye/flye_keep_haplotypes.fasta ${REF_DIR}/CR-IA16-P.sorghi-genome/falcon_unzip/flye_hap.phased.0.fasta ${REF_DIR}/CR-IA16-P.sorghi-genome/falcon_unzip/flye_hap.phased.1.fasta \
 --cpu 40 \
 --temp_directory ${TEMP_DIR}/Fungal_Genome_Quality_Comparison \
 --transfer \
