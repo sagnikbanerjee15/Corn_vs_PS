@@ -236,6 +236,7 @@ def main():
             
             cmd = ""
             cmd += f" STAR "
+            cmd += f" --runThreadN  {options.cpu} "
             cmd += f" --readFilesIn {options.output_directory}/alignments/{sample.split('/')[-1]}_1.fastq.gz {options.output_directory}/alignments/{sample.split('/')[-1]}_2.fastq.gz "
             cmd += f" --genomeDir {options.output_directory}/star_indices/{genome_reference.split('/')[-1]} "
             cmd += f" --outSAMtype SAM "
@@ -250,9 +251,9 @@ def main():
             cmd += f" --outFilterMatchNminOverLread 0.7 "
             cmd += f" --outSAMattributes NH HI AS nM NM MD jM jI XS "
             cmd += f" --alignSJoverhangMin 8 " 
-            cmd += f" --outFileNamePrefix {options.output_directory}/alignments/{sample.split('/')[-1]}_"
-            cmd += f" 1> {options.output_directory}/alignments/{sample.split('/')[-1]}.output "
-            cmd += f" 2> {options.output_directory}/alignments/{sample.split('/')[-1]}.error "
+            cmd += f" --outFileNamePrefix {options.output_directory}/alignments/{sample.split('/')[-1]}_{genome_reference.split('/')[-1]}_"
+            cmd += f" 1> {options.output_directory}/alignments/{sample.split('/')[-1]}_{genome_reference.split('/')[-1]}.output "
+            cmd += f" 2> {options.output_directory}/alignments/{sample.split('/')[-1]}_{genome_reference.split('/')[-1]}.error "
             if framework_of_choice == "docker":
                 pass
             else:
