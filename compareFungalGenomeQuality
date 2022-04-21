@@ -236,6 +236,7 @@ def main():
             cmd = ""
             cmd += f" STAR "
             cmd += f" --readFilesIn {options.output_directory}/alignments/{sample.split('/')[-1]}_1.fastq.gz {options.output_directory}/alignments/{sample.split('/')[-1]}_2.fastq.gz "
+            cmd += f" --genomeDir {options.output_directory}/star_indices/{genome_reference.split('/')[-1]} "
             cmd += f" --outSAMtype SAM "
             cmd += f" --outFilterMultimapNmax 10000 " 
             cmd += f" --alignIntronMin 20  "
