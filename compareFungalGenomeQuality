@@ -169,9 +169,7 @@ def main():
         # Prepare STAR references
         ################################################################################################################################################################################################################################################
         
-        print(genome_reference,os.path.isdir(f"{options.output_directory}/{genome_reference.split('/')[-1]}_star_index"), os.path.isdir(f"{options.temp_directory}/star_indices/{genome_reference.split('/')[-1]}_star_index"))
-        sys.stdout.flush()
-        if os.path.isdir(f"{options.output_directory}/{genome_reference.split('/')[-1]}_star_index") == False and os.path.isdir(f"{options.temp_directory}/star_indices/{genome_reference.split('/')[-1]}_star_index") == False:
+        if os.path.isdir(f"{options.output_directory}/star_index/{genome_reference.split('/')[-1]}") == False and os.path.isdir(f"{options.temp_directory}/star_indices/{genome_reference.split('/')[-1]}") == False:
             
             # Copy the genome reference to output directory
             cmd = f"cp {genome_reference} {options.output_directory}"
