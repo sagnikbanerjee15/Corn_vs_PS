@@ -169,20 +169,21 @@ def main():
         # Prepare STAR references
         ################################################################################################################################################################################################################################################
         
-        # Copy the genome reference to output directory
-        cmd = f"cp {genome_reference} {options.output_directory}"
-        os.system(cmd)
-        
-        # Calculate genome size and number of references
-        number_of_references, total_length = 0, 0 
-        fhr = open(f"{options.output_directory}/{genome_reference.split('/')[-1]}", "r")
-        for line in fhr:
-            if line[0]==">": 
-                number_of_references+=1
-                total_length+=len(fhr.readline().strip())
-        fhr.close()
-        
         if os.path.isdir(f"{options.output_directory}/{genome_reference.split('/')[-1]}_star_index") == False and os.path.isdir(f"{options.temp_directory}/star_indices/{genome_reference.split('/')[-1]}_star_index") == False:
+            
+            # Copy the genome reference to output directory
+            cmd = f"cp {genome_reference} {options.output_directory}"
+            os.system(cmd)
+            
+            # Calculate genome size and number of references
+            number_of_references, total_length = 0, 0 
+            fhr = open(f"{options.output_directory}/{genome_reference.split('/')[-1]}", "r")
+            for line in fhr:
+                if line[0]==">": 
+                    number_of_references+=1
+                    total_length+=len(fhr.readline().strip())
+            fhr.close()
+            
             cmd = ""
             cmd += f"STAR "
             cmd += f" --runMode genomeGenerate "
