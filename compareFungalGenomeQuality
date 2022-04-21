@@ -214,7 +214,7 @@ def main():
                 cmd = f"mv {options.output_directory}/star_indices/{genome_reference.split('/')[-1]} {options.temp_directory}/star_indices/"
                 os.system(cmd)
                 
-        elif os.path.isdir(f"{options.output_directory}/{genome_reference.split('/')[-1]}_star_index") == False and os.path.isdir(f"{options.temp_directory}/star_indices/{genome_reference.split('/')[-1]}_star_index") == True:
+        elif os.path.isdir(f"{options.output_directory}/star_index/{genome_reference.split('/')[-1]}") == False and os.path.isdir(f"{options.temp_directory}/star_indices/{genome_reference.split('/')[-1]}") == True:
             cmd = f"cp -r {options.temp_directory}/star_indices/{genome_reference.split('/')[-1]} {options.output_directory}/star_indices/"
             os.system(cmd)
         
