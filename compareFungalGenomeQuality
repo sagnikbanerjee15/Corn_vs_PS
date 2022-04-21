@@ -228,9 +228,16 @@ def main():
         
         for sample in options.pe_reads:
             
+            
+            # Copy raw data to output directory
+            cmd = f"cp {sample}_1.fastq {options.output_directory}"
+            os.system(cmd)
+            cmd = f"cp {sample}_2.fastq {options.output_directory}"
+            os.system(cmd)
+            
             cmd = ""
             cmd += f" STAR "
-            cmd += f" --readFilesIn {sample}_1.fastq {sample}_2.fastq "
+            cmd += f" --readFilesIn {options.output_directory}/{sample.split('/')[-1]}_1.fastq {options.output_directory}/{sample.split('/')[-1]}_2.fastq "
             cmd += f" --outSAMtype SAM Unsorted "
             cmd += f" --outFilterMultimapNmax 10000 " 
             cmd += f" --alignIntronMin 20  "
@@ -242,7 +249,9 @@ def main():
             cmd += f" --outFilterMatchNminOverLread 0.7 "
             cmd += f" --outSAMattributes NH HI AS nM NM MD jM jI XS "
             cmd += f" --alignSJoverhangMin 8 " 
-            cmd += f" --outFileNamePrefix {options.output_directory}/alignments/{sample}_"
+            cmd += f" --outFileNamePrefix {options.output_directory}/alignments/{sample.split('/')[-1]}_"
+            cmd += f" 1> {options.output_directory}/alignments/{sample.split('/')[-1]}.output "
+            cmd += f" 2> {options.output_directory}/alignments/{sample.split('/')[-1]}.error "
             if framework_of_choice == "docker":
                 pass
             else:
