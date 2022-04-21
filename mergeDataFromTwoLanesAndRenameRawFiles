@@ -32,5 +32,4 @@ for filepath in lane1_files:
         output_filename = f"{output_directory}/{filename.split('_')[0]}_2.fastq.gz"
     
     cmd = f"cat {filepath_lane1} {filepath_lane2} > {output_filename}"
-    print(f"Executing {cmd}")
     os.system(cmd)
