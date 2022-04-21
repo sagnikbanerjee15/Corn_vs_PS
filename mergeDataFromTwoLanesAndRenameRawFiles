@@ -33,4 +33,4 @@ for filepath in lane1_files:
     
     cmd = f"cat {filepath_lane1} {filepath_lane2} > {output_filename}"
     print(f"Executing {cmd}")
-    #os.system(cmd)
+    os.system(cmd)
