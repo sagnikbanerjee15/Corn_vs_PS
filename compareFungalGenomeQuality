@@ -169,6 +169,7 @@ def main():
         # Prepare STAR references
         ################################################################################################################################################################################################################################################
         
+        print(genome_reference,os.path.isdir(f"{options.output_directory}/{genome_reference.split('/')[-1]}_star_index"), os.path.isdir(f"{options.temp_directory}/star_indices/{genome_reference.split('/')[-1]}_star_index"))
         if os.path.isdir(f"{options.output_directory}/{genome_reference.split('/')[-1]}_star_index") == False and os.path.isdir(f"{options.temp_directory}/star_indices/{genome_reference.split('/')[-1]}_star_index") == False:
             
             # Copy the genome reference to output directory
@@ -231,14 +232,14 @@ def main():
             
             
             # Copy raw data to output directory
-            cmd = f"cp {sample}_1.fastq {options.output_directory}"
+            cmd = f"cp {sample}_1.fastq {options.output_directory}/alignments/"
             os.system(cmd)
-            cmd = f"cp {sample}_2.fastq {options.output_directory}"
+            cmd = f"cp {sample}_2.fastq {options.output_directory}/alignments/"
             os.system(cmd)
             
             cmd = ""
             cmd += f" STAR "
-            cmd += f" --readFilesIn {options.output_directory}/{sample.split('/')[-1]}_1.fastq {options.output_directory}/{sample.split('/')[-1]}_2.fastq "
+            cmd += f" --readFilesIn {options.output_directory}/alignments/{sample.split('/')[-1]}_1.fastq {options.output_directory}/alignments/{sample.split('/')[-1]}_2.fastq "
             cmd += f" --outSAMtype SAM "
             cmd += f" --outFilterMultimapNmax 10000 " 
             cmd += f" --alignIntronMin 20  "
@@ -267,6 +268,7 @@ def main():
                                       command = cmd, 
                                       cpus = options.cpu, 
                                       memory = '50g')
+            os.system(f"rm {options.output_directory}/alignments/{sample.split('/')[-1]}_1.fastq {options.output_directory}/alignments/{sample.split('/')[-1]}_2.fastq")
             
             if options.transfer:
                 cmd = f"mv {options.output_directory}/alignments/{sample}_* {options.temp_directory}/alignments/"
