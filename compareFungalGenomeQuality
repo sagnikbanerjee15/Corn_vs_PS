@@ -170,6 +170,7 @@ def main():
         ################################################################################################################################################################################################################################################
         
         print(genome_reference,os.path.isdir(f"{options.output_directory}/{genome_reference.split('/')[-1]}_star_index"), os.path.isdir(f"{options.temp_directory}/star_indices/{genome_reference.split('/')[-1]}_star_index"))
+        sys.stdout.flush()
         if os.path.isdir(f"{options.output_directory}/{genome_reference.split('/')[-1]}_star_index") == False and os.path.isdir(f"{options.temp_directory}/star_indices/{genome_reference.split('/')[-1]}_star_index") == False:
             
             # Copy the genome reference to output directory
@@ -241,6 +242,7 @@ def main():
             cmd += f" --outFilterMultimapNmax 10000 " 
             cmd += f" --alignIntronMin 20  "
             cmd += f" --alignIntronMax 10000 "
+            cmd += f" --readFilesCommand zcat "
             cmd += f" --limitBAMsortRAM 107374182400 "
             cmd += f" --alignEndsType Local " # ALLOWS soft clipping 
             cmd += f" --outSAMprimaryFlag AllBestScore "
