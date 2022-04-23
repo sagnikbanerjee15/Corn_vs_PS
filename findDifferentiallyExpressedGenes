@@ -156,12 +156,16 @@ def main():
     ################################################################################################################################################################################################################################################
     options.bwa_index = f"{options.output_directory}/bwa_index"
     os.system(f"mkdir -p {options.bwa_index}")
+    os.system(f"mkdir -p {options.temp_directory}/bwa_index")
     options.alignments = f"{options.output_directory}/alignments"
     os.system(f"mkdir -p {options.alignments}")
+    os.system(f"mkdir -p {options.temp_directory}/alignments")
     options.salmon_counts = f"{options.output_directory}/salmon_counts"
     os.system(f"mkdir -p {options.salmon_counts}")
+    os.system(f"mkdir -p {options.temp_directory}/salmon_counts")
     options.deseq2_results = f"{options.output_directory}/deseq2_results"
     os.system(f"mkdir -p {options.deseq2_results}")
+    os.system(f"mkdir -p {options.temp_directory}/deseq2_results")
     
     ################################################################################################################################################################################################################################################
     # Read data from metadata file
@@ -187,7 +191,9 @@ def main():
     options.reference = f"{options.bwa_index}/{options.reference.split('/')[-1]}"
     
     # Generate the BWA index
-    cmd = f"bwa index {options.reference}"
+    cmd = f"bwa index {options.reference} "
+    cmd += f" 1> {options.reference}.output"
+    cmd += f" 2> {options.reference}.error"
     software = "bwa"
     version = list_of_softwares_with_versions[software]
     runSingularityCommand(logging, 
