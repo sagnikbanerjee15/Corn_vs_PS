@@ -15,7 +15,6 @@ import random
 import glob
 import time
 import subprocess
-from astropy.units import fL
 
 
 def parseCommandLineArguments():
