@@ -15,7 +15,6 @@ import random
 import glob
 import time
 import subprocess
-import pandas as pd
 
 
 def parseCommandLineArguments():
@@ -167,7 +166,9 @@ def main():
     # Read data from metadata file
     ################################################################################################################################################################################################################################################
     
-    options.metadata = pd.read_csv(options.metadatafilename)
+    #options.metadata = pd.read_csv(options.metadatafilename)
+    # Restruture later
+    
     
     ################################################################################################################################################################################################################################################
     # Prepare genome indices
