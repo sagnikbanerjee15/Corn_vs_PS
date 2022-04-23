@@ -1,0 +1,34 @@
+#!/bin/bash
+
+#SBATCH -n 40
+#SBATCH -N 1
+#SBATCH --partition=long
+##SBATCH --partition=priority-mem768
+#SBATCH --qos=maizegdb
+#SBATCH --mem=200G
+#SBATCH --time=14-00:00:00
+#SBATCH --job-name="ABRIDGE"
+#SBATCH --mail-user=sagnik@iastate.edu
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
+#SBATCH --output=/project/maizegdb/sagnik/CORN_VS_PS/data/analysis_with_argentinian_isolate.output
+#SBATCH --error=/project/maizegdb/sagnik/CORN_VS_PS/data/analysis_with_argentinian_isolate.error
+
+module load singularity
+
+ROOT_DIR="/project/maizegdb/sagnik/CORN_VS_PS/"
+TEMP_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS/data/analysis_with_argentinian_isolate"
+REF_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS/data/reference/combined"
+
+${ROOT_DIR}/findDifferentiallyExpressedGenes \
+--transfer \
+--metadatafilename ${ROOT_DIR}/Corn_vs_PS/metadata.csv \
+--output_directory ${ROOT_DIR}/data/analysis_with_argentinian_isolate \
+--temp_directory ${TEMP_DIR} \
+--framework singularity \
+--cpu 40 \
+--reference ${REF_DIR}/transcripts.fasta \
+--gene_to_transcript_map dummy \
+1> ${ROOT_DIR}/data/complete_analysis.output \
+2> ${ROOT_DIR}/data/complete_analysis.error
