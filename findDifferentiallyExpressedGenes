@@ -173,7 +173,7 @@ def main():
     options.metadata = []
     for line in fhr:
         if "SampleName" in line: continue
-        options.metadata.append(line.strip().split())
+        options.metadata.append(line.strip().split(','))
     fhr.close()
     
     
