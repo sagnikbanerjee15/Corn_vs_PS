@@ -191,25 +191,28 @@ def main():
     options.reference = f"{options.bwa_index}/{options.reference.split('/')[-1]}"
     
     # Generate the BWA index
-    cmd = f"bwa index {options.reference} "
-    cmd += f" 1> {options.reference}.output"
-    cmd += f" 2> {options.reference}.error"
-    software = "bwa"
-    version = list_of_softwares_with_versions[software]
-    runSingularityCommand(logging, 
-                          "bwa", 
-                          version, 
-                          image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
-                          container_name = "bwa_index_prep", 
-                          volumes = volumes_list,
-                          command = cmd, 
-                          cpus = options.cpu, 
-                          memory = '100g')
     
-    # Move the star index to the temp directory if a transfer is requested
-    if (options.transfer):
-        cmd = f"mv {options.reference}* {options.temp_directory}/bwa_index/"
-        os.system(cmd)
+    if os.path.exists(f"{options.reference}.bwt") == False and os.path.exists(f"{options.temp_directory}/{options.reference.split('/')[-1]}.bwt") == False:
+        cmd = f"bwa index {options.reference} "
+        cmd += f" 1> {options.reference}.output"
+        cmd += f" 2> {options.reference}.error"
+        
+        software = "bwa"
+        version = list_of_softwares_with_versions[software]
+        runSingularityCommand(logging, 
+                              "bwa", 
+                              version, 
+                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                              container_name = "bwa_index_prep", 
+                              volumes = volumes_list,
+                              command = cmd, 
+                              cpus = options.cpu, 
+                              memory = '100g')
+        
+        # Move the star index to the temp directory if a transfer is requested
+        if (options.transfer):
+            cmd = f"mv {options.reference}* {options.temp_directory}/bwa_index/"
+            os.system(cmd)
         
     ################################################################################################################################################################################################################################################
     # Adapter trim short reads - Skipped (no need for it)
@@ -226,8 +229,6 @@ def main():
     # Perform actual mapping
     for row in options.metadata:
         # Copy the raw data from the directory
-        print(row)
-        sys.stdout.flush()
         samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
         
         if os.path.exists(f"{options.output_directory}/alignments/{samplename}.bam") == False and os.path.exists(f"{options.temp_directory}/alignments/{samplename}.bam") == False:
