@@ -21,7 +21,7 @@ ROOT_DIR="/project/maizegdb/sagnik/CORN_VS_PS/"
 TEMP_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS/data/analysis_with_argentinian_isolate"
 REF_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS/data/reference/combined"
 
-${ROOT_DIR}/findDifferentiallyExpressedGenes \
+${ROOT_DIR}/Corn_vs_PS/findDifferentiallyExpressedGenes \
 --transfer \
 --metadatafilename ${ROOT_DIR}/Corn_vs_PS/metadata.csv \
 --output_directory ${ROOT_DIR}/data/analysis_with_argentinian_isolate \
@@ -30,5 +30,5 @@ ${ROOT_DIR}/findDifferentiallyExpressedGenes \
 --cpu 40 \
 --reference ${REF_DIR}/transcripts.fasta \
 --gene_to_transcript_map dummy \
-1> ${ROOT_DIR}/data/complete_analysis.output \
-2> ${ROOT_DIR}/data/complete_analysis.error
+1> ${ROOT_DIR}/data/analysis_with_argentinian_isolate.output \
+2> ${ROOT_DIR}/data/analysis_with_argentinian_isolate.error
