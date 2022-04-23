@@ -242,12 +242,15 @@ def main():
                 os.system(cmd)
             
             cmd = f"bwa mem "
+            cmd += f" -t {options.cpu}"
+            cmd += f" -o {options.output_directory}/alignments/{samplename}.sam "
+            cmd += f" -a " #output all alignments for SE or unpaired PE
             cmd += f" {options.output_directory}/bwa_index/{options.reference.split('/')[-1]} "
             if ended == "SE":
                 cmd += f" {options.output_directory}/alignments/{samplename}.fastq.gz "
             else:
                 cmd += f" {options.output_directory}/alignments/{samplename}_1.fastq.gz {options.output_directory}/alignments/{samplename}_2.fastq.gz "
-            cmd += f" 1> {options.output_directory}/alignments/{samplename}.sam "
+            
             cmd += f" 2> {options.output_directory}/alignments/{samplename}.error "
             
             software = "bwa"
