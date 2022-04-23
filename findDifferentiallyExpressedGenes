@@ -15,6 +15,7 @@ import random
 import glob
 import time
 import subprocess
+from astropy.units import fL
 
 
 def parseCommandLineArguments():
@@ -113,7 +114,8 @@ def main():
                                        "deseq2":"latest"}
 
     volumes_list = [f"{options.output_directory}:{options.output_directory}",
-                    f"{options.temp_directory}:{options.temp_directory}"
+                    f"{options.temp_directory}:{options.temp_directory}",
+                    f"{'/'.join(options.reference.split('/')[:-1])}:{'/'.join(options.reference.split('/')[:-1])}"
                     ]
     
     os.system( f"mkdir -p {options.output_directory}/singularity_images" )
@@ -168,6 +170,12 @@ def main():
     
     #options.metadata = pd.read_csv(options.metadatafilename)
     # Restruture later
+    fhr = open(options.metadatafilename, "r")
+    options.metadata = []
+    for line in fhr:
+        if "SampleName" in line: continue
+        options.metadata.append(line.strip().split())
+    fhr.close()
     
     
     ################################################################################################################################################################################################################################################
@@ -175,21 +183,19 @@ def main():
     ################################################################################################################################################################################################################################################
     
     # Copy the reference into the index folder
-    
     cmd = f"cp {options.reference} {options.bwa_index}"
     os.system(cmd)
     options.reference = f"{options.bwa_index}/{options.reference.split('/')[-1]}"
     
     # Generate the BWA index
-    
     cmd = f"bwa index {options.reference}"
-    software = "star"
+    software = "bwa"
     version = list_of_softwares_with_versions[software]
     runSingularityCommand(logging, 
                           "bwa", 
                           version, 
                           image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
-                          container_name = f"bwa_index_prep", 
+                          container_name = "bwa_index_prep", 
                           volumes = volumes_list,
                           command = cmd, 
                           cpus = options.cpu, 
@@ -199,6 +205,77 @@ def main():
     if (options.transfer):
         cmd = f"mv {options.reference}* {options.temp_directory}/bwa_index/"
         os.system(cmd)
+        
+    ################################################################################################################################################################################################################################################
+    # Adapter trim short reads - Skipped (no need for it)
+    ################################################################################################################################################################################################################################################
+    
+    ################################################################################################################################################################################################################################################
+    # Align short reads to reference
+    ################################################################################################################################################################################################################################################
+    
+    # Copy the reference index if it is not present
+    cmd = f"cp {options.temp_directory}/bwa_index/{options.reference.split('/')[-1]}* {options.output_directory}/bwa_index"
+    os.system(cmd)
+    
+    # Perform actual mapping
+    for row in options.metadata:
+        # Copy the raw data from the directory
+        samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
+        
+        if os.path.exists(f"{options.output_directory}/alignments/{samplename}.bam") == False and os.path.exists(f"{options.temp_directory}/alignments/{samplename}.bam") == False:
+            if ended == "SE":
+                cmd = f"cp {location}/{samplename}.fastq.gz {options.output_directory}/alignments"
+                os.system(cmd)
+            else:
+                cmd = f"cp {location}/{samplename}_1.fastq.gz {options.output_directory}/alignments"
+                os.system(cmd)
+                cmd = f"cp {location}/{samplename}_2.fastq.gz {options.output_directory}/alignments"
+                os.system(cmd)
+            
+            cmd = f"bwa mem "
+            cmd += f" {options.output_directory}/bwa_index/{options.reference.split('/')[-1]} "
+            if ended == "SE":
+                cmd += f" {options.output_directory}/alignments/{samplename}.fastq.gz "
+            else:
+                cmd += f" {options.output_directory}/alignments/{samplename}_1.fastq.gz {options.output_directory}/alignments/{samplename}_2.fastq.gz "
+            cmd += f" 1> {options.output_directory}/alignments/{samplename}.sam "
+            cmd += f" 2> {options.output_directory}/alignments/{samplename}.error "
+            
+            software = "bwa"
+            version = list_of_softwares_with_versions[software]
+            runSingularityCommand(logging, 
+                                  "bwa", 
+                                  version, 
+                                  image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                                  container_name = "bwa_alignment",
+                                  volumes = volumes_list,
+                                  command = cmd, 
+                                  cpus = options.cpu, 
+                                  memory = '100g')
+            
+            # Convert the alignment file to bam
+            cmd = f"samtools view -@ {options.cpu} -bS -o {options.output_directory}/alignments/{samplename}.bam {options.output_directory}/alignments/{samplename}.sam"
+            
+            software = "samtools"
+            version = list_of_softwares_with_versions[software]
+            runSingularityCommand(logging, 
+                                  "bwa", 
+                                  version, 
+                                  image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                                  container_name = "bwa_alignment",
+                                  volumes = volumes_list,
+                                  command = cmd, 
+                                  cpus = options.cpu, 
+                                  memory = '100g')
+            
+            
+            if options.transfer:
+                cmd = f"mv {options.output_directory}/alignments/{samplename}.bam {options.temp_directory}/alignments/"
+                os.system(cmd)
+                
+                cmd = f"rm {options.output_directory}/alignments/{samplename}.sam"
+                os.system(cmd)
     
     
 
