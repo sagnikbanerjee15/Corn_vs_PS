@@ -220,6 +220,8 @@ def main():
     # Perform actual mapping
     for row in options.metadata:
         # Copy the raw data from the directory
+        print(row)
+        sys.stdout.flush()
         samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
         
         if os.path.exists(f"{options.output_directory}/alignments/{samplename}.bam") == False and os.path.exists(f"{options.temp_directory}/alignments/{samplename}.bam") == False:
