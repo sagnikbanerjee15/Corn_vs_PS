@@ -248,7 +248,6 @@ def main():
             cmd += f" --reorder " #force SAM output order to match order of input reads
             cmd += f" -S {options.output_directory}/alignments/{samplename}.sam "
             cmd += f" --sensitive-local "
-            cmd += f" {options.output_directory}/bowtie2_index/{options.reference.split('/')[-1]} "
             if ended == "SE":
                 cmd += f" -U {options.output_directory}/alignments/{samplename}.fastq.gz "
             else:
