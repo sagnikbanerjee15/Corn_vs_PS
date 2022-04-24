@@ -29,6 +29,6 @@ ${ROOT_DIR}/Corn_vs_PS/findDifferentiallyExpressedGenes \
 --framework singularity \
 --cpu 40 \
 --reference ${REF_DIR}/transcripts.fasta \
---gene_to_transcript_map dummy \
+--gene_to_transcript_map ${REF_DIR}/transcriptome.gtf \
 1> ${ROOT_DIR}/data/analysis_with_argentinian_isolate.output \
 2> ${ROOT_DIR}/data/analysis_with_argentinian_isolate.error

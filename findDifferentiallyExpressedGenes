@@ -218,20 +218,22 @@ def main():
     # Adapter trim short reads - Skipped (no need for it)
     ################################################################################################################################################################################################################################################
     
-    ################################################################################################################################################################################################################################################
-    # Align short reads to reference
-    ################################################################################################################################################################################################################################################
+    
     
     # Copy the reference index if it is not present
     cmd = f"cp {options.temp_directory}/bwa_index/{options.reference.split('/')[-1]}* {options.output_directory}/bwa_index"
     os.system(cmd)
     
-    # Perform actual mapping
+    
     for row in options.metadata:
-        # Copy the raw data from the directory
+        
         samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
         
+        ################################################################################################################################################################################################################################################
+        # Align short reads to reference
+        ################################################################################################################################################################################################################################################
         if os.path.exists(f"{options.output_directory}/alignments/{samplename}.bam") == False and os.path.exists(f"{options.temp_directory}/alignments/{samplename}.bam") == False:
+            # Copy the raw data from the directory
             if ended == "SE":
                 cmd = f"cp {location}/{samplename}.fastq.gz {options.output_directory}/alignments"
                 os.system(cmd)
@@ -280,6 +282,9 @@ def main():
                                   cpus = options.cpu, 
                                   memory = '100g')
             
+            cmd = f"rm {options.output_directory}/alignments/{samplename}_1.fastq.gz {options.output_directory}/alignments/{samplename}_2.fastq.gz"
+            os.system(cmd) 
+            
             
             if options.transfer:
                 cmd = f"mv {options.output_directory}/alignments/{samplename}.bam {options.temp_directory}/alignments/"
@@ -287,8 +292,57 @@ def main():
                 
                 cmd = f"rm {options.output_directory}/alignments/{samplename}.sam"
                 os.system(cmd)
+        
+        ################################################################################################################################################################################################################################################
+        # Generate gene counts
+        ################################################################################################################################################################################################################################################
+        if os.path.exists(f"{options.output_directory}/alignments/{samplename}.bam") == False:
+            cmd = f"cp {options.temp_directory}/alignments/{samplename}.bam {options.output_directory}/alignments"
+            os.system(cmd)
+            
+            cmd = ""
+            cmd += f" salmon quant "
+            cmd += f" --libType A "
+            cmd += f" --alignments {options.output_directory}/alignments/{samplename}.bam "
+            cmd += f" --targets {options.reference} "
+            cmd += f" --threads {options.cpu}"
+            cmd += f" --geneMap {options.gene_to_transcript_map}"
+            cmd += f" --output {options.output_directory}/salmon_counts/{samplename}"
+            cmd += f" --discardOrphans " # Discard orphan alignments in the input .  If this flag is passed, then only paired alignments will be considered toward quantification estimates.  The default behavior is to consider orphan alignments if no valid paired mappings exist.
+            cmd += f" --seqBias --posBias --gcBias"
+            cmd += f" 1> {options.output_directory}/salmon_counts/{samplename}.output "
+            cmd += f" 2> {options.output_directory}/salmon_counts/{samplename}.error "
+            
+            software = "salmon"
+            version = list_of_softwares_with_versions[software]
+            runSingularityCommand(logging, 
+                                  "salmon", 
+                                  version, 
+                                  image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                                  container_name = "salmon_counts",
+                                  volumes = volumes_list,
+                                  command = cmd, 
+                                  cpus = options.cpu, 
+                                  memory = '100g')
+            
+            cmd = f"rm {options.output_directory}/alignments/{samplename}.bam"
+            os.system(cmd)
+            
+            if options.transfer:
+                cmd = f"cp -r {options.output_directory}/salmon_counts/{samplename} {options.temp_directory}/salmon_counts"
+                os.system(cmd)
     
     
 
 if __name__ == "__main__":
     main()
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
