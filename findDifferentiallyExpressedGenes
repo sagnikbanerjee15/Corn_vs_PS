@@ -331,7 +331,7 @@ def main():
             cmd += f" --threads {options.cpu}"
             cmd += f" --geneMap {options.gene_to_transcript_map}"
             cmd += f" --output {options.output_directory}/salmon_counts/{samplename}"
-            cmd += f" --discardOrphans " # Discard orphan alignments in the input .  If this flag is passed, then only paired alignments will be considered toward quantification estimates.  The default behavior is to consider orphan alignments if no valid paired mappings exist.
+            #cmd += f" --discardOrphans " # Discard orphan alignments in the input .  If this flag is passed, then only paired alignments will be considered toward quantification estimates.  The default behavior is to consider orphan alignments if no valid paired mappings exist.
             cmd += f" --seqBias --posBias --gcBias"
             cmd += f" 1> {options.output_directory}/salmon_counts/{samplename}.output "
             cmd += f" 2> {options.output_directory}/salmon_counts/{samplename}.error "
