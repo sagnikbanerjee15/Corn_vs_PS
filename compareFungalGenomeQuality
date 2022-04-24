@@ -272,17 +272,17 @@ def main():
                 if options.transfer:
                     cmd = f"mv {options.output_directory}/alignments/{sample.split('/')[-1]}_* {options.temp_directory}/alignments/"
                     os.system(cmd)
+                 
+                # Remove reference after mapping is complete   
+                cmd = f"rm -rf {options.output_directory}/star_indices/{genome_reference.split('/')[-1]}"
+                os.system(cmd)
+                
             elif os.path.exists(f"{options.output_directory}/alignments/{sample.split('/')[-1]}_{genome_reference.split('/')[-1]}_Aligned.out.sam") == False and os.path.exists(f"{options.temp_directory}/alignments/{sample.split('/')[-1]}_Aligned.out.sam") == True:
                 cmd = f"cp {options.temp_directory}/alignments/{sample.split('/')[-1]}_Aligned.out.sam {options.output_directory}/alignments/{sample.split('/')[-1]}_Aligned.out.sam"
                 os.system(cmd)
                 
             # Call function here for checking each read
             
-        
-        # Remove reference after mapping is complete
-        if options.transfer:
-            cmd = f"rm {options.output_directory}/star_indices/{genome_reference.split('/')[-1]}"
-            os.system(cmd)
 
 
 if __name__ == "__main__":
