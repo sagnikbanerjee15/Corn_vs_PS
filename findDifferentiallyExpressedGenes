@@ -108,7 +108,7 @@ def main():
                                        "trimmomatic":"0.39",
                                        "sratools":"3.0.0",
                                        "bwa":"0.7.17",
-                                       "salmon":"1.5.2",
+                                       "salmon":"1.8.0",
                                        "gffread":"0.12.1",
                                        "deseq2":"latest"}
 
