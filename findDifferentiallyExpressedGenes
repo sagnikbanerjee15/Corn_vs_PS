@@ -193,7 +193,7 @@ def main():
     
     # Generate the bowtie2 index
     
-    if os.path.exists(f"{options.reference}.bwt") == False and os.path.exists(f"{options.temp_directory}/{options.reference.split('/')[-1]}.bwt") == False:
+    if os.path.exists(f"{options.reference}.1.bt2") == False and os.path.exists(f"{options.temp_directory}/{options.reference.split('/')[-1]}.1.bt2") == False:
         cmd = f"bowtie2-build --threads {options.cpu} {options.reference} {options.reference}"
         cmd += f" 1> {options.reference}.output"
         cmd += f" 2> {options.reference}.error"
