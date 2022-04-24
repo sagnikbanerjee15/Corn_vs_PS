@@ -269,7 +269,8 @@ def main():
                                   memory = '100g')
             
             # Convert the alignment file to bam
-            cmd = f"samtools view -@ {options.cpu} -bS {options.output_directory}/alignments/{samplename}.sam|samtools sort -@ {options.cpu} -n > {options.output_directory}/alignments/{samplename}.bam"
+            #cmd = f"samtools view -@ {options.cpu} -bS {options.output_directory}/alignments/{samplename}.sam|samtools sort -@ {options.cpu} -n > {options.output_directory}/alignments/{samplename}.bam"
+            cmd = f"samtools view -@ {options.cpu} -bS {options.output_directory}/alignments/{samplename}.sam > {options.output_directory}/alignments/{samplename}.bam"
             
             software = "samtools"
             version = list_of_softwares_with_versions[software]
