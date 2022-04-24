@@ -107,10 +107,11 @@ def main():
     list_of_softwares_with_versions = {"samtools":"1.14",
                                        "trimmomatic":"0.39",
                                        "sratools":"3.0.0",
-                                       "bwa":"0.7.17",
+                                       "bowtie2":"0.7.17",
                                        "salmon":"1.8.0",
                                        "gffread":"0.12.1",
-                                       "deseq2":"latest"}
+                                       "deseq2":"latest",
+                                       "bowtie2":"2.4.5"}
 
     volumes_list = [f"{options.output_directory}:{options.output_directory}",
                     f"{options.temp_directory}:{options.temp_directory}",
@@ -154,9 +155,9 @@ def main():
     ################################################################################################################################################################################################################################################
     # Create directories and sub-directories for analysis
     ################################################################################################################################################################################################################################################
-    options.bwa_index = f"{options.output_directory}/bwa_index"
-    os.system(f"mkdir -p {options.bwa_index}")
-    os.system(f"mkdir -p {options.temp_directory}/bwa_index")
+    options.bowtie2_index = f"{options.output_directory}/bowtie2_index"
+    os.system(f"mkdir -p {options.bowtie2_index}")
+    os.system(f"mkdir -p {options.temp_directory}/bowtie2_index")
     options.alignments = f"{options.output_directory}/alignments"
     os.system(f"mkdir -p {options.alignments}")
     os.system(f"mkdir -p {options.temp_directory}/alignments")
@@ -186,24 +187,24 @@ def main():
     ################################################################################################################################################################################################################################################
     
     # Copy the reference into the index folder
-    cmd = f"cp {options.reference} {options.bwa_index}"
+    cmd = f"cp {options.reference} {options.bowtie2_index}"
     os.system(cmd)
-    options.reference = f"{options.bwa_index}/{options.reference.split('/')[-1]}"
+    options.reference = f"{options.bowtie2_index}/{options.reference.split('/')[-1]}"
     
-    # Generate the BWA index
+    # Generate the bowtie2 index
     
     if os.path.exists(f"{options.reference}.bwt") == False and os.path.exists(f"{options.temp_directory}/{options.reference.split('/')[-1]}.bwt") == False:
-        cmd = f"bwa index {options.reference} "
+        cmd = f"bowtie2-build --threads {options.cpu} {options.reference} {options.reference}"
         cmd += f" 1> {options.reference}.output"
         cmd += f" 2> {options.reference}.error"
         
-        software = "bwa"
+        software = "bowtie2"
         version = list_of_softwares_with_versions[software]
         runSingularityCommand(logging, 
-                              "bwa", 
+                              "bowtie2", 
                               version, 
                               image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
-                              container_name = "bwa_index_prep", 
+                              container_name = "bowtie2_index_prep", 
                               volumes = volumes_list,
                               command = cmd, 
                               cpus = options.cpu, 
@@ -211,17 +212,15 @@ def main():
         
         # Move the star index to the temp directory if a transfer is requested
         if (options.transfer):
-            cmd = f"mv {options.reference}* {options.temp_directory}/bwa_index/"
+            cmd = f"mv {options.reference}* {options.temp_directory}/bowtie2_index/"
             os.system(cmd)
         
     ################################################################################################################################################################################################################################################
     # Adapter trim short reads - Skipped (no need for it)
     ################################################################################################################################################################################################################################################
     
-    
-    
     # Copy the reference index if it is not present
-    cmd = f"cp {options.temp_directory}/bwa_index/{options.reference.split('/')[-1]}* {options.output_directory}/bwa_index"
+    cmd = f"cp {options.temp_directory}/bowtie2_index/{options.reference.split('/')[-1]}* {options.output_directory}/bowtie2_index"
     os.system(cmd)
     
     
@@ -243,25 +242,27 @@ def main():
                 cmd = f"cp {location}/{samplename}_2.fastq.gz {options.output_directory}/alignments"
                 os.system(cmd)
             
-            cmd = f"bwa mem "
-            cmd += f" -t {options.cpu}"
-            cmd += f" -o {options.output_directory}/alignments/{samplename}.sam "
-            cmd += f" -Y " #use soft clipping for supplementary alignments
-            cmd += f" {options.output_directory}/bwa_index/{options.reference.split('/')[-1]} "
+            cmd = f"bowtie2 "
+            cmd += f" -x {options.reference} "
+            cmd += f" --threads {options.cpu} "
+            cmd += f" --reorder " #force SAM output order to match order of input reads
+            cmd += f" -S {options.output_directory}/alignments/{samplename}.sam "
+            cmd += f" --sensitive-local "
+            cmd += f" {options.output_directory}/bowtie2_index/{options.reference.split('/')[-1]} "
             if ended == "SE":
-                cmd += f" {options.output_directory}/alignments/{samplename}.fastq.gz "
+                cmd += f" -U {options.output_directory}/alignments/{samplename}.fastq.gz "
             else:
-                cmd += f" {options.output_directory}/alignments/{samplename}_1.fastq.gz {options.output_directory}/alignments/{samplename}_2.fastq.gz "
+                cmd += f" -1 {options.output_directory}/alignments/{samplename}_1.fastq.gz -2 {options.output_directory}/alignments/{samplename}_2.fastq.gz "
             
             cmd += f" 2> {options.output_directory}/alignments/{samplename}.error "
             
-            software = "bwa"
+            software = "bowtie2"
             version = list_of_softwares_with_versions[software]
             runSingularityCommand(logging, 
-                                  "bwa", 
+                                  "bowtie2", 
                                   version, 
                                   image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
-                                  container_name = "bwa_alignment",
+                                  container_name = "bowtie2_alignment",
                                   volumes = volumes_list,
                                   command = cmd, 
                                   cpus = options.cpu, 
@@ -273,7 +274,7 @@ def main():
             software = "samtools"
             version = list_of_softwares_with_versions[software]
             runSingularityCommand(logging, 
-                                  "bwa", 
+                                  "bowtie2", 
                                   version, 
                                   image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
                                   container_name = "samtools_sort_by_name",
