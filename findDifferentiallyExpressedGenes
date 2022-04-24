@@ -294,6 +294,7 @@ def main():
                 os.system(cmd)
         
         
+        """
         cmd = f"cp {options.temp_directory}/alignments/{samplename}.bam {options.output_directory}/alignments"
         os.system(cmd)
         cmd = f"samtools sort -@ {options.cpu} -n -o {options.output_directory}/alignments/{samplename}_sortedByName.bam {options.output_directory}/alignments/{samplename}.bam"
@@ -313,6 +314,7 @@ def main():
         os.system(f"mv {options.output_directory}/alignments/{samplename}.bam {options.temp_directory}/alignments/{samplename}.bam")
         os.system(f"rm {options.output_directory}/alignments/{samplename}.bam")
         continue
+        """
 
         ################################################################################################################################################################################################################################################
         # Generate gene counts
