@@ -268,7 +268,7 @@ def main():
                                   memory = '100g')
             
             # Convert the alignment file to bam
-            cmd = f"samtools view -@ {options.cpu} -bS -o {options.output_directory}/alignments/{samplename}.bam {options.output_directory}/alignments/{samplename}.sam"
+            cmd = f"samtools view -@ {options.cpu} -bS {options.output_directory}/alignments/{samplename}.sam|samtools sort -@ {options.cpu} -n > {options.output_directory}/alignments/{samplename}.bam"
             
             software = "samtools"
             version = list_of_softwares_with_versions[software]
@@ -276,7 +276,7 @@ def main():
                                   "bwa", 
                                   version, 
                                   image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
-                                  container_name = "bwa_alignment",
+                                  container_name = "samtools_sort_by_name",
                                   volumes = volumes_list,
                                   command = cmd, 
                                   cpus = options.cpu, 
@@ -293,6 +293,27 @@ def main():
                 cmd = f"rm {options.output_directory}/alignments/{samplename}.sam"
                 os.system(cmd)
         
+        
+        cmd = f"cp {options.temp_directory}/alignments/{samplename}.bam {options.output_directory}/alignments"
+        os.system(cmd)
+        cmd = f"samtools sort -@ {options.cpu} -n -o {options.output_directory}/alignments/{samplename}_sortedByName.bam {options.output_directory}/alignments/{samplename}.bam"
+        software = "samtools"
+        version = list_of_softwares_with_versions[software]
+        runSingularityCommand(logging, 
+                              "bwa", 
+                              version, 
+                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                              container_name = "samtools_sort_by_name",
+                              volumes = volumes_list,
+                              command = cmd, 
+                              cpus = options.cpu, 
+                              memory = '100g')
+        
+        os.system(f"mv {options.output_directory}/alignments/{samplename}_sortedByName.bam {options.output_directory}/alignments/{samplename}.bam")
+        #os.system(f"mv {options.output_directory}/alignments/{samplename}.bam {options.temp_directory}/alignments/{samplename}.bam")
+        #os.system(f"rm {options.output_directory}/alignments/{samplename}.bam")
+        sys.exit()
+
         ################################################################################################################################################################################################################################################
         # Generate gene counts
         ################################################################################################################################################################################################################################################
