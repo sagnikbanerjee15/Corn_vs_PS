@@ -111,7 +111,8 @@ def main():
                                        "salmon":"1.8.0",
                                        "gffread":"0.12.1",
                                        "deseq2":"latest",
-                                       "bowtie2":"2.4.5"}
+                                       "bowtie2":"2.4.5",
+                                       "multiqc":"1.12"}
 
     volumes_list = [f"{options.output_directory}:{options.output_directory}",
                     f"{options.temp_directory}:{options.temp_directory}",
