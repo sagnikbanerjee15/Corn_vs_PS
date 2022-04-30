@@ -368,6 +368,9 @@ def main():
         if options.transfer:
             cmd = f"cp -r {options.output_directory}/salmon_counts/counts_across_all_samples.csv {options.temp_directory}/salmon_counts/counts_across_all_samples.csv"
             os.system(cmd)
+            
+            cmd = f"rm  {options.output_directory}/salmon_counts/counts_across_all_samples.csv"
+            os.system(cmd)
     
 if __name__ == "__main__":
     main()
