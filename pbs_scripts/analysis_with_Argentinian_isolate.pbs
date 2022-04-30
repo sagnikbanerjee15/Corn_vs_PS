@@ -32,3 +32,8 @@ ${ROOT_DIR}/Corn_vs_PS/findDifferentiallyExpressedGenes \
 --gene_to_transcript_map ${REF_DIR}/transcriptome.gtf \
 1> ${ROOT_DIR}/data/analysis_with_argentinian_isolate.output \
 2> ${ROOT_DIR}/data/analysis_with_argentinian_isolate.error
+
+${ROOT_DIR}/find_differentially_expressed_genes_deseq2_timecourse_expt.R \
+${ROOT_DIR}/Corn_vs_PS/metadata.csv \
+${ROOT_DIR}/data/analysis_with_argentinian_isolate/salmon_counts/counts_across_all_samples.csv \
+${ROOT_DIR}/data/analysis_with_argentinian_isolate/deseq2_results/timecourse

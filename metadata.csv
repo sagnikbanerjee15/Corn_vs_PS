@@ -1,4 +1,4 @@
-SampleName,Ended,Cultivar,Condition,Timepoints,Biological Replicate (BR),Location
+SampleName,Ended,Cultivar,Condition,Timepoints,Replicate,Location
 1,PE,H95,Control,0hpi,1,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
 2,PE,H95,Inoculated,0hpi,1,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
 3,PE,Rp1-I,Control,0hpi,1,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
