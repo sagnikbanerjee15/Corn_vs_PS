@@ -310,7 +310,6 @@ def main():
             cmd += f" --threads {options.cpu}"
             cmd += f" --geneMap {options.gene_to_transcript_map}"
             cmd += f" --output {options.output_directory}/salmon_counts/{samplename}"
-            #cmd += f" --discardOrphans " # Discard orphan alignments in the input .  If this flag is passed, then only paired alignments will be considered toward quantification estimates.  The default behavior is to consider orphan alignments if no valid paired mappings exist.
             cmd += f" --seqBias --posBias --gcBias"
             cmd += f" 1> {options.output_directory}/salmon_counts/{samplename}.output "
             cmd += f" 2> {options.output_directory}/salmon_counts/{samplename}.error "
@@ -334,8 +333,40 @@ def main():
                 cmd = f"cp -r {options.output_directory}/salmon_counts/{samplename} {options.temp_directory}/salmon_counts"
                 os.system(cmd)
     
+    ################################################################################################################################################################################################################################################
+    # Merge gene counts and generate a metadata file for DESeq2
+    ################################################################################################################################################################################################################################################
     
-
+    if os.path.exists(f"{options.temp_directory}/salmon_counts/counts_across_all_samples.csv") == False and os.path.exists(f"{options.output_directory}/salmon_counts/counts_across_all_samples.csv") == False:
+        cmd = "salmon quantmerge "
+        cmd += " numreads numreads "
+        cmd += " --genes "
+        cmd += f" --output {options.output_directory}/salmon_counts/counts_across_all_samples.csv "
+        
+        cmd_names = " --names "
+        cmd_quants = " --quants "
+        for row in options.metadata:
+            samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
+            cmd_quants += f"{options.temp_directory}/salmon_counts/{samplename} "
+            cmd_names += f"{samplename}"
+            
+        cmd += cmd_quants + cmd_names
+        
+        software = "salmon"
+        version = list_of_softwares_with_versions[software]
+        runSingularityCommand(logging, 
+                              "salmon", 
+                              version, 
+                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                              container_name = "salmon_counts",
+                              volumes = volumes_list,
+                              command = cmd, 
+                              cpus = options.cpu, 
+                              memory = '1g')
+        if options.transfer:
+            cmd = f"cp -r {options.output_directory}/salmon_counts/counts_across_all_samples.csv {options.temp_directory}/salmon_counts/counts_across_all_samples.csv"
+            os.system(cmd)
+    
 if __name__ == "__main__":
     main()
     
