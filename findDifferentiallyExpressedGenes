@@ -348,9 +348,11 @@ def main():
         for row in options.metadata:
             samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
             cmd_quants += f"{options.temp_directory}/salmon_counts/{samplename} "
-            cmd_names += f"{samplename}"
+            cmd_names += f"{samplename} "
             
         cmd += cmd_quants + cmd_names
+        cmd += f"1> {options.output_directory}/salmon_counts/counts_across_all_samples.output "
+        cmd += f"2> {options.output_directory}/salmon_counts/counts_across_all_samples.error "
         
         software = "salmon"
         version = list_of_softwares_with_versions[software]
