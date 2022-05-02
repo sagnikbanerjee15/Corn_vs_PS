@@ -341,7 +341,7 @@ def main():
     columnnames = []
     for row_num,row in enumerate(options.metadata):
         samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
-        filename_with_counts = f"{options.temp_directory}/{samplename}/quant.genes.sf"    
+        filename_with_counts = f"{options.temp_directory}/salmon_counts/{samplename}/quant.genes.sf"    
         columnnames.append(samplename)
         fhr = open(filename_with_counts,"r")
         for line in fhr:
