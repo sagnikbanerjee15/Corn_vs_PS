@@ -356,7 +356,7 @@ def main():
     fhw = open(f"{options.output_directory}/salmon_counts/counts_across_all_samples.csv", "w")
     fhw.write(f"Gene_name,{','.join(columnnames)}\n")
     for gene in salmon_counts_from_genes_to_samples:
-        fhw.write(f"{gene},{','.join(salmon_counts_from_genes_to_samples['gene'])}\n")
+        fhw.write(f"{gene},{','.join(salmon_counts_from_genes_to_samples[gene])}\n")
     fhw.close()
         
     if options.transfer:
