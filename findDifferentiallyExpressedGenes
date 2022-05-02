@@ -337,40 +337,34 @@ def main():
     # Merge gene counts and generate a metadata file for DESeq2
     ################################################################################################################################################################################################################################################
     
-    if os.path.exists(f"{options.temp_directory}/salmon_counts/counts_across_all_samples.csv") == False and os.path.exists(f"{options.output_directory}/salmon_counts/counts_across_all_samples.csv") == False:
-        cmd = "salmon quantmerge "
-        cmd += " numreads numreads "
-        cmd += " --genes "
-        cmd += f" --output {options.output_directory}/salmon_counts/counts_across_all_samples.csv "
+    salmon_counts_from_genes_to_samples = {}
+    columnnames = []
+    for row_num,row in enumerate(options.metadata):
+        samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
+        filename_with_counts = f"{options.temp_directory}/{samplename}/quant.genes.sf"    
+        columnnames.append(samplename)
+        fhr = open(filename_with_counts,"r")
+        for line in fhr:
+            if "EffectiveLength" in line: continue
+            Name, Length, EffectiveLength, TPM, NumReads = line.strip().split()
+            if row_num == 0:
+                salmon_counts_from_genes_to_samples[Name] = []
+            salmon_counts_from_genes_to_samples[Name].append(NumReads)
+                
+        fhr.close()
+    
+    fhw = open(f"{options.output_directory}/salmon_counts/counts_across_all_samples.csv", "w")
+    fhw.write(f"Gene_name,{','.join(columnnames)}\n")
+    for gene in salmon_counts_from_genes_to_samples:
+        fhw.write(f"{gene},{','.join(salmon_counts_from_genes_to_samples['gene'])}\n")
+    fhw.close()
         
-        cmd_names = " --names "
-        cmd_quants = " --quants "
-        for row in options.metadata:
-            samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
-            cmd_quants += f"{options.temp_directory}/salmon_counts/{samplename} "
-            cmd_names += f"{samplename} "
-            
-        cmd += cmd_quants + cmd_names
-        cmd += f"1> {options.output_directory}/salmon_counts/counts_across_all_samples.output "
-        cmd += f"2> {options.output_directory}/salmon_counts/counts_across_all_samples.error "
+    if options.transfer:
+        cmd = f"cp -r {options.output_directory}/salmon_counts/counts_across_all_samples.csv {options.temp_directory}/salmon_counts/counts_across_all_samples.csv"
+        os.system(cmd)
         
-        software = "salmon"
-        version = list_of_softwares_with_versions[software]
-        runSingularityCommand(logging, 
-                              "salmon", 
-                              version, 
-                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
-                              container_name = "salmon_counts",
-                              volumes = volumes_list,
-                              command = cmd, 
-                              cpus = options.cpu, 
-                              memory = '1g')
-        if options.transfer:
-            cmd = f"cp -r {options.output_directory}/salmon_counts/counts_across_all_samples.csv {options.temp_directory}/salmon_counts/counts_across_all_samples.csv"
-            os.system(cmd)
-            
-            cmd = f"rm  {options.output_directory}/salmon_counts/counts_across_all_samples.csv"
-            os.system(cmd)
+        cmd = f"rm  {options.output_directory}/salmon_counts/counts_across_all_samples.csv"
+        os.system(cmd)
     
 if __name__ == "__main__":
     main()

@@ -1,1 +1,4 @@
-./find_differentially_expressed_genes_deseq2_timecourse_expt.R /Users/sagnik/work/Corn_vs_PS/metadata.csv /Users/sagnik/work/Corn_vs_PS_data/analysis_with_argentinian_isolate/counts_across_all_samples.csv /Users/sagnik/work/Corn_vs_PS_data/analysis_with_argentinian_isolate/deseq2_results/timecourse
+./find_differentially_expressed_genes_deseq2_timecourse_expt.R \
+/Users/sagnik/work/Corn_vs_PS/metadata.csv \
+/Users/sagnik/work/Corn_vs_PS_data/analysis_with_argentinian_isolate/counts_across_all_samples.csv \
+/Users/sagnik/work/Corn_vs_PS_data/analysis_with_argentinian_isolate/deseq2_results/timecourse
