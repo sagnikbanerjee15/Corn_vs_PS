@@ -19,9 +19,9 @@ module load singularity
 
 ROOT_DIR="/project/maizegdb/sagnik/CORN_VS_PS/"
 TEMP_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS/analysis_with_argentinian_isolate"
-REF_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS/data/reference/combined"
+REF_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS/data/reference/combined_B73_Argentina_PS"
 
-${ROOT_DIR}/Corn_vs_PS/findDifferentiallyExpressedGenes \
+${ROOT_DIR}/Corn_vs_PS/find_differentially_expressed_genes \
 --transfer \
 --metadatafilename ${ROOT_DIR}/Corn_vs_PS/metadata.csv \
 --output_directory ${ROOT_DIR}/data/analysis_with_argentinian_isolate \

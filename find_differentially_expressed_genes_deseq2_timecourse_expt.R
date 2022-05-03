@@ -40,9 +40,7 @@ metadata$Timepoints = as.factor(metadata$Timepoints)
 
 count_data_filename = args[2]
 count_data_filename = "/Users/sagnik/work/Corn_vs_PS_data/analysis_with_argentinian_isolate/counts_across_all_samples.csv"
-count_data = read.csv2(count_data_filename, sep = "\t", check.names = FALSE, nrows=10000000, stringsAsFactors=FALSE)
-row.names(count_data) = count_data$Name
-count_data$Name = NULL
+count_data = read.csv2(count_data_filename, sep = ",", check.names = FALSE, nrows=10000000, row.names = 1, stringsAsFactors=FALSE)
 count_data[, c(1,dim(count_data)[2])] <- apply(count_data[, c(1,dim(count_data)[2])],2,
                                                 function(x) as.numeric(as.character(x))
 )
@@ -53,8 +51,9 @@ colnames(count_data) = column_names
 rownames(count_data) = row_names
 count_data = round(count_data)
 
-all <- apply(count_data, 1, function(x) all(x==0) )
-count_data <- count_data[!all,]
+#all <- apply(count_data, 1, function(x) all(x==0) )
+#count_data <- count_data[!all,]
+count_data <- subset(count_data, rowSums(count_data > 1) >= 3)
 
 output_filename_prefix = args[3]
 output_filename_prefix = "/Users/sagnik/work/Corn_vs_PS_data/analysis_with_argentinian_isolate/deseq2_results/timecourse"
@@ -113,18 +112,33 @@ generatePCAPlotsToDetermineBiologicalReplicateSimilarity(counts = count_data, pr
 
 # Generate PCA plots for DESeq2 normalized counts
 
-dds_entire_dataset <- DESeqDataSetFromMatrix(countData = round(count_data),
+dds_entire_dataset <- DESeqDataSetFromMatrix(countData = count_data,
                               colData = metadata,
                               design = ~ Condition )
 dds_entire_dataset = estimateSizeFactors(dds_entire_dataset)
-sizeFactors(dds_entire_dataset)
+deseq2_normalized_counts = as.data.frame(counts(dds_entire_dataset, normalized = TRUE))
 sizeFactors(dds_entire_dataset) = colSums(count_data)/gm_mean(colSums(count_data))
-sizeFactors(dds_entire_dataset)
-normalized_counts = as.data.frame(counts(dds_entire_dataset, normalized = TRUE))
-generatePCAPlotsToDetermineBiologicalReplicateSimilarity(counts = normalized_counts, prefix = paste0(output_filename_prefix,"/","pca_deseq2_normalized_counts"), cultivars = cultivars)
+lib_size_normalized_counts = as.data.frame(counts(dds_entire_dataset, normalized = TRUE))
+generatePCAPlotsToDetermineBiologicalReplicateSimilarity(counts = deseq2_normalized_counts, prefix = paste0(output_filename_prefix,"/","pca_deseq2_normalized_counts"), cultivars = cultivars)
 
-cor(count_data$`1`,count_data$`3`, method = "pearson")
-cor(normalized_counts$`1`,normalized_counts$`3`, method = "pearson")
+calculatePearsonsCorrelationCoefficient <- function(list1, list2)
+{
+  n = length(list1)
+  numerator = n * sum(list1*list2) - sum(list1)*sum(list2)
+  denominator = (sqrt(n * sum(list1*list1) - (sum(list1) * sum(list1)))) * (sqrt(n * sum(list2*list2) - (sum(list2) * sum(list2))) )
+  print(numerator)
+  print(denominator)
+  numerator/denominator
+}
+calculatePearsonsCorrelationCoefficient(deseq2_normalized_counts$`2`,lib_size_normalized_counts$`2`)
+calculatePearsonsCorrelationCoefficient(count_data$`1`,count_data$`2`)
+calculatePearsonsCorrelationCoefficient(deseq2_normalized_counts$`1`,deseq2_normalized_counts$`2`)
+calculatePearsonsCorrelationCoefficient(lib_size_normalized_counts$`1`,lib_size_normalized_counts$`2`)
+
+cor(count_data$`1`,count_data$`2`, method = "pearson")
+cor(deseq2_normalized_counts$`1`,deseq2_normalized_counts$`2`, method = "pearson")
+cor(lib_size_normalized_counts$`1`,lib_size_normalized_counts$`2`, method = "pearson")
+
 ############################################################################################################################################################################################################
 
 ############################################################################################################################################################################################################
