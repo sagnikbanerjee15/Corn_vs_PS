@@ -1,0 +1,279 @@
+#! /usr/bin/env python3
+
+from argparse import RawTextHelpFormatter
+from pprint import pformat
+
+import argparse
+import logging
+import os
+import pprint
+import sys
+import re
+import time
+import multiprocessing
+import random
+import glob
+import time
+import subprocess
+
+
+def parseCommandLineArguments():
+    parser = argparse.ArgumentParser( prog = "findDifferentiallyExpressedGenes", description = "Perform analysis to detect differentially expressed genes from raw RNA-Seq data", formatter_class = RawTextHelpFormatter )
+    required_named = parser.add_argument_group( 'Required arguments' )
+    optional_named = parser.add_argument_group( 'Optional arguments' )
+
+    ##################################################################################################
+    # Required arguments
+    ##################################################################################################
+    required_named.add_argument( "-metadatafilename", "--metadatafilename", help = "Enter the metadata file. The file format should be same as ListOfNCBI-SRASamplesForExperimentST.csv", required = True )
+    required_named.add_argument( "-output_directory", "--output_directory", help = "Enter the name of the output directory. all analysis will be stored here. Please make sure you have sufficient space on your disk to reproduce all the analysis", required = True )
+    required_named.add_argument( "-reference", "--reference", help = "Enter the name of the genome file in fasta format", required = True)
+    required_named.add_argument( "-gene_to_transcript_map", "--gene_to_transcript_map", help = "Enter the gene to transcript mapping", required = True)
+
+    ##################################################################################################
+    # Optional arguments
+    ##################################################################################################
+    optional_named.add_argument( "--cpu", "-cpu", help = "Enter the number of CPUs. Please note that all alignments will be conducted using a single CPU. This argument will control how many parallel alignments can be launched", default = 1 )
+    optional_named.add_argument( "--temp_directory", "-temp_dir", help = "Enter a temporary directory. All files will be dumped in this directory to prevent the output directory to get crowded. Outputs and Error files will not be moved", default = None )
+    optional_named.add_argument( "--transfer", "--transfer", help = "Keep moving intermediate files and folders from the output directory to the temp directory to reduce space consumption. Developed for Ceres architecture", action = "store_true")
+    optional_named.add_argument( "--framework", "-fm", help = "Enter your choice of framework", choices = ["docker", "singularity"], default = "docker" )
+    optional_named.add_argument( "--logfilename", "-logfilename", help = "Enter the name of the logfile" )
+
+    ##################################################################################################
+    # Suppressed arguments
+    ##################################################################################################
+    parser.add_argument( "--metadata_expanded", "-metadata_expanded", help = argparse.SUPPRESS )
+    parser.add_argument( "--sra_list_to_be_downloaded", "-sra_list_to_be_downloaded", help = argparse.SUPPRESS )
+    # Name of the logfile
+
+    return parser.parse_args()
+
+
+def configureLogger( options ):
+    if os.path.exists( options.logfilename ) == True:
+        os.system( f"rm -f {options.logfilename}" )
+    logging.basicConfig( format = '%(asctime)s - %(message)s', datefmt = '%d-%b-%y %H:%M:%S', level = logging.DEBUG, filename = options.logfilename )
+
+
+def runDockerCommand( logging, name, version, image_location, container_name, volumes, command , cpus = 1, memory = '1g' ):
+    """
+    Runs the command in a docker container
+    """
+
+    # Runs the main command
+    docker_cmd = f" docker run "
+    # docker_cmd += f" -ti "
+    docker_cmd += f" --rm "
+    docker_cmd += f" --cpus={cpus}"
+    docker_cmd += f" --memory='{memory}'"
+    # docker_cmd += f" --name {container_name}"
+    for mapping in volumes:
+        docker_cmd += f" -v {mapping}"
+    docker_cmd += f" {image_location}:{version} "
+    docker_cmd += f" bash -c '{command}'"
+    logging.info( f"Running command - {docker_cmd}" )
+    os.system( docker_cmd )
+
+def runSingularityCommand( logging, name, version, image_location, container_name, volumes, command , cpus = 1, memory = '1g' ):
+    """
+    Runs the command in a Singularity container
+    """
+
+    # Runs the main command
+    singularity_cmd = f" singularity exec  "
+    # singularity_cmd += f" --hostname {container_name}"
+    for mapping in volumes:
+        singularity_cmd += f" -B {mapping}"
+    singularity_cmd += f" {image_location} "
+    singularity_cmd += f" bash -c \"{command}\" "
+    os.system( singularity_cmd )
+    logging.info( f"Running command - {singularity_cmd}" )
+
+def main():
+    options = parseCommandLineArguments()
+    
+    os.system(f"mkdir -p {options.output_directory}")
+    
+    if options.logfilename == None:
+        options.logfilename = f"{options.output_directory}/progress.log"
+        
+    
+    configureLogger( options )    
+    logging.info( "Logger has been configured" )
+    
+    ################################################################################################################################################################################################################################################
+    # Pull down docker or singularity images
+    ################################################################################################################################################################################################################################################
+
+    list_of_softwares_with_versions = {"samtools":"1.14",
+                                       "trimmomatic":"0.39",
+                                       "sratools":"3.0.0",
+                                       "bowtie2":"0.7.17",
+                                       "salmon":"1.8.0",
+                                       "gffread":"0.12.1",
+                                       "deseq2":"latest",
+                                       "bowtie2":"2.4.5",
+                                       "multiqc":"1.12",
+                                       "STAR":"2.7.9a"}
+
+    volumes_list = [f"{options.output_directory}:{options.output_directory}",
+                    f"{options.temp_directory}:{options.temp_directory}",
+                    f"{'/'.join(options.reference.split('/')[:-1])}:{'/'.join(options.reference.split('/')[:-1])}"
+                    ]
+    
+    os.system( f"mkdir -p {options.output_directory}/singularity_images" )
+    os.system( f"which docker > {options.output_directory}/find_docker" )
+    os.system( f"which singularity > {options.output_directory}/find_singularity" )
+    docker_installed = 1 if "Command not found" not in open( f"{options.output_directory}/find_docker", "r" ).read() else 0
+    singularity_installed = 1 if "Command not found" not in open( f"{options.output_directory}/find_singularity", "r" ).read() else 0
+
+    if docker_installed == 0 and singularity_installed == 0:
+        print( "You need to have either docker or singularity installed" )
+        sys.exit()
+
+    framework_of_choice = ""
+    if options.framework == "docker":
+        if docker_installed == 1:
+            framework_of_choice = "docker"
+        else:
+            framework_of_choice = "singularity"
+
+    if options.framework == "singularity":
+        if singularity_installed == 1:
+            framework_of_choice = "singularity"
+        else:
+            framework_of_choice = "docker"
+            
+    if framework_of_choice == "docker":
+        for software in list_of_softwares_with_versions:
+            version = list_of_softwares_with_versions[software]
+            os.system( f"docker pull ghcr.io/sagnikbanerjee15/docker_tools_and_pipelines/{software}:{version}" )
+    else:
+        for software in list_of_softwares_with_versions:
+            version = list_of_softwares_with_versions[software]
+            if os.path.exists(f"{options.output_directory}/singularity_images/{software}:{version}")==False:
+                os.system( f"singularity pull {options.output_directory}/singularity_images/{software}:{version} docker://ghcr.io/sagnikbanerjee15/docker_tools_and_pipelines/{software}:{version}" )
+    ################################################################################################################################################################################################################################################
+
+    ################################################################################################################################################################################################################################################
+    # Create directories and sub-directories for analysis
+    ################################################################################################################################################################################################################################################
+    options.star_index = f"{options.output_directory}/star_index"
+    os.system(f"mkdir -p {options.star_index}")
+    os.system(f"mkdir -p {options.temp_directory}/star_index")
+    options.alignments = f"{options.output_directory}/alignments"
+    os.system(f"mkdir -p {options.alignments}")
+    os.system(f"mkdir -p {options.temp_directory}/alignments")
+
+    ################################################################################################################################################################################################################################################
+    # Read data from metadata file
+    ################################################################################################################################################################################################################################################
+    
+    #options.metadata = pd.read_csv(options.metadatafilename)
+    # Restruture later
+    fhr = open(options.metadatafilename, "r")
+    options.metadata = []
+    for line in fhr:
+        if "SampleName" in line: continue
+        options.metadata.append(line.strip().split(','))
+    fhr.close()
+    
+    
+    ################################################################################################################################################################################################################################################
+    # Prepare genome indices
+    ################################################################################################################################################################################################################################################
+    
+    
+    # Generate the bowtie2 index
+    
+    if os.path.exists(f"{options.reference}.1.bt2") == False and os.path.exists(f"{options.temp_directory}/{options.reference.split('/')[-1]}.1.bt2") == False:
+        cmd = f"STAR --runMode genomeGenerate --runThreadN {options.cpu} --genomeFastaFiles {options.reference} --genomeDir {options.star_index}"
+        cmd += f" 1> {options.star_index}.output"
+        cmd += f" 2> {options.star_index}.error"
+        
+        software = "star"
+        version = list_of_softwares_with_versions[software]
+        runSingularityCommand(logging, 
+                              "star", 
+                              version, 
+                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                              container_name = "star_index_prep", 
+                              volumes = volumes_list,
+                              command = cmd, 
+                              cpus = options.cpu, 
+                              memory = '100g')
+        
+        # Move the star index to the temp directory if a transfer is requested
+        if (options.transfer):
+            cmd = f"mv {options.star_index} {options.temp_directory}"
+            os.system(cmd)
+            
+    
+    # Copy the reference index if it is not present
+    cmd = f"cp {options.temp_directory}/star_index {options.output_directory}"
+    os.system(cmd)
+    
+    for row in options.metadata:
+        
+        samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
+        
+        ################################################################################################################################################################################################################################################
+        # Align short reads to reference
+        ################################################################################################################################################################################################################################################
+        if os.path.exists(f"{options.output_directory}/alignments/{samplename}.bam") == False and os.path.exists(f"{options.temp_directory}/alignments/{samplename}.bam") == False:
+            # Copy the raw data from the directory
+            if ended == "SE":
+                cmd = f"cp {location}/{samplename}.fastq.gz {options.output_directory}/alignments"
+                os.system(cmd)
+            else:
+                cmd = f"cp {location}/{samplename}_1.fastq.gz {options.output_directory}/alignments"
+                os.system(cmd)
+                cmd = f"cp {location}/{samplename}_2.fastq.gz {options.output_directory}/alignments"
+                os.system(cmd)
+            
+            cmd = f"STAR "
+            cmd += f" --genomeDir {options.star_index}"
+            cmd += f" --outSAMtype BAM SortedByCoordinate "
+            cmd += f" --outFilterMultimapNmax 100 "  
+            cmd += f" --alignIntronMin 20  "
+            cmd += f" --alignIntronMax 10000 "
+            cmd += f" --limitBAMsortRAM 107374182400 "
+            cmd += f" --alignEndsType Local " # ALLOWS soft clipping 
+            cmd += f" --outSAMprimaryFlag AllBestScore "
+            cmd += f" --outFilterScoreMinOverLread 0.60"
+            cmd += f" --outFilterMatchNminOverLread 0.60 "
+            cmd += f" --outSAMattributes NH HI AS nM NM MD jM jI XS "
+            cmd += f" --outReadsUnmapped Fastx "
+            cmd += f" --outFileNamePrefix {options.output_directory}/alignments/{samplename}_"
+            cmd += f" --readFilesIn {options.output_directory}/alignments/{samplename}_1.fastq.gz {options.output_directory}/alignments/{samplename}_2.fastq.gz "
+            cmd += f" 1> {options.output_directory}/alignments/{samplename}.output "
+            cmd += f" 2> {options.output_directory}/alignments/{samplename}.error "
+            
+            software = "star"
+            version = list_of_softwares_with_versions[software]
+            runSingularityCommand(logging, 
+                                  "star", 
+                                  version, 
+                                  image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                                  container_name = "star_alignment",
+                                  volumes = volumes_list,
+                                  command = cmd, 
+                                  cpus = options.cpu, 
+                                  memory = '100g')
+            if options.transfer:
+                cmd = f"mv {options.output_directory}/alignments/{samplename}*.bam {options.temp_directory}/alignments/"
+                os.system(cmd)
+                
+                cmd = f"mv {options.output_directory}/alignments/{samplename}*.out {options.temp_directory}/alignments/"
+                os.system(cmd)
+                
+                cmd = f"rm {options.output_directory}/alignments/{samplename}*gz"
+                os.system(cmd)
+            
+            
+            
+    
+    
+    
+    
+    
