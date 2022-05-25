@@ -131,7 +131,6 @@ def main():
     docker_installed = 1 if "no docker in" not in open( f"{options.output_directory}/find_docker", "r" ).read() else 0
     singularity_installed = 1 if "no singularity in" not in open( f"{options.output_directory}/find_singularity", "r" ).read() else 0
 
-    print(docker_installed, singularity_installed)
     if docker_installed == 0 and singularity_installed == 0:
         print( "You need to have either docker or singularity installed" )
         sys.exit()
@@ -148,7 +147,8 @@ def main():
             framework_of_choice = "singularity"
         else:
             framework_of_choice = "docker"
-            
+    
+    print(framework_of_choice)
     if framework_of_choice == "docker":
         for software in list_of_softwares_with_versions:
             version = list_of_softwares_with_versions[software]
