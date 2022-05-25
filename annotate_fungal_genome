@@ -270,8 +270,8 @@ def main():
                 cmd = f"rm {options.output_directory}/alignments/{samplename}*gz"
                 os.system(cmd)
             
-            
-            
+if __name__ == "__main__":
+    main()
     
     
     
