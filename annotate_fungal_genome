@@ -108,7 +108,7 @@ def main():
     access_key = "".join(access_key_raw.split("REMOVETHISTEXT"))
     
     os.environ["CR_PAT"] = access_key
-    os.system( f"echo $CR_PAT | docker login ghcr.io -u USERNAME --password-stdin" )
+    os.system( f"echo $CR_PAT | docker login ghcr.io -u sagnikbanerjee15 --password-stdin" )
     list_of_softwares_with_versions = {"samtools":"1.14",
                                        "trimmomatic":"0.39",
                                        "sratools":"3.0.0",
