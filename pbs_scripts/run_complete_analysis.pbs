@@ -8,7 +8,7 @@
 #SBATCH --mem=200G
 #SBATCH --time=14-00:00:00
 #SBATCH --job-name="ABRIDGE"
-#SBATCH --mail-user=sagnik@iastate.edu
+#SBATCH --mail-user=sagnikbanerjee15@gmail.com
 #SBATCH --mail-type=BEGIN
 #SBATCH --mail-type=END
 #SBATCH --mail-type=FAIL
