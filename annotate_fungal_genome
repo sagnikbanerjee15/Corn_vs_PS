@@ -18,7 +18,7 @@ import subprocess
 
 
 def parseCommandLineArguments():
-    parser = argparse.ArgumentParser( prog = "findDifferentiallyExpressedGenes", description = "Perform analysis to detect differentially expressed genes from raw RNA-Seq data", formatter_class = RawTextHelpFormatter )
+    parser = argparse.ArgumentParser( prog = "annotate_fungal_genome", description = "Perform analysis to detect differentially expressed genes from raw RNA-Seq data", formatter_class = RawTextHelpFormatter )
     required_named = parser.add_argument_group( 'Required arguments' )
     optional_named = parser.add_argument_group( 'Optional arguments' )
 
