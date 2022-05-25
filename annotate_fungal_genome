@@ -28,7 +28,6 @@ def parseCommandLineArguments():
     required_named.add_argument( "-metadatafilename", "--metadatafilename", help = "Enter the metadata file. The file format should be same as ListOfNCBI-SRASamplesForExperimentST.csv", required = True )
     required_named.add_argument( "-output_directory", "--output_directory", help = "Enter the name of the output directory. all analysis will be stored here. Please make sure you have sufficient space on your disk to reproduce all the analysis", required = True )
     required_named.add_argument( "-reference", "--reference", help = "Enter the name of the genome file in fasta format", required = True)
-    required_named.add_argument( "-gene_to_transcript_map", "--gene_to_transcript_map", help = "Enter the gene to transcript mapping", required = True)
 
     ##################################################################################################
     # Optional arguments

@@ -24,7 +24,7 @@ REF_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS/data/reference"
 ${ROOT_DIR}/Corn_vs_PS/annotate_fungal_genome \
 --metadatafilename ${ROOT_DIR}/Corn_vs_PS/metadata.csv \
 --output_directory ${ROOT_DIR}/data/PS_SALSA_annotation \
---genome_references ${REF_DIR}/combined_B73_PS_SALSA/genome.fasta \
+--reference ${REF_DIR}/combined_B73_PS_SALSA/genome.fasta \
 --cpu 40 \
 --temp_directory ${TEMP_DIR}/PS_SALSA_annotation \
 --transfer \
