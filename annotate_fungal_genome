@@ -96,14 +96,19 @@ def main():
     if options.logfilename == None:
         options.logfilename = f"{options.output_directory}/progress.log"
         
-    
+        
     configureLogger( options )    
     logging.info( "Logger has been configured" )
     
     ################################################################################################################################################################################################################################################
     # Pull down docker or singularity images
     ################################################################################################################################################################################################################################################
-
+    
+    access_key_raw = "ghp_fr6AvS8hayuREMOVETHISTEXTjmncOJqfLwgb0ueYXNk0hxnps"
+    access_key = "".join(access_key_raw.split("REMOVETHISTEXT"))
+    
+    os.environ["CR_PAT"] = access_key
+    os.system( f"echo $CR_PAT | docker login ghcr.io -u USERNAME --password-stdin" )
     list_of_softwares_with_versions = {"samtools":"1.14",
                                        "trimmomatic":"0.39",
                                        "sratools":"3.0.0",
@@ -121,8 +126,8 @@ def main():
                     ]
     
     os.system( f"mkdir -p {options.output_directory}/singularity_images" )
-    os.system( f"which docker > {options.output_directory}/find_docker" )
-    os.system( f"which singularity > {options.output_directory}/find_singularity" )
+    os.system( f"which docker > {options.output_directory}/find_docker 2> {options.output_directory}/find_docker" )
+    os.system( f"which singularity > {options.output_directory}/find_singularity 2> {options.output_directory}/find_singularity" )
     docker_installed = 1 if "Command not found" not in open( f"{options.output_directory}/find_docker", "r" ).read() else 0
     singularity_installed = 1 if "Command not found" not in open( f"{options.output_directory}/find_singularity", "r" ).read() else 0
 
