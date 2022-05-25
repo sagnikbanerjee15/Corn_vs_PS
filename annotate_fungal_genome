@@ -126,6 +126,7 @@ def main():
     docker_installed = 1 if "Command not found" not in open( f"{options.output_directory}/find_docker", "r" ).read() else 0
     singularity_installed = 1 if "Command not found" not in open( f"{options.output_directory}/find_singularity", "r" ).read() else 0
 
+    print(docker_installed, singularity_installed)
     if docker_installed == 0 and singularity_installed == 0:
         print( "You need to have either docker or singularity installed" )
         sys.exit()
