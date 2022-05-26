@@ -257,10 +257,10 @@ def main():
             cmd += f" 1> {options.output_directory}/alignments/{samplename}.output "
             cmd += f" 2> {options.output_directory}/alignments/{samplename}.error "
             
-            software = "star"
+            software = "STAR"
             version = list_of_softwares_with_versions[software]
             runSingularityCommand(logging, 
-                                  "star", 
+                                  "STAR", 
                                   version, 
                                   image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
                                   container_name = "star_alignment",
