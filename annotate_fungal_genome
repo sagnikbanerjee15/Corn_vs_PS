@@ -194,7 +194,7 @@ def main():
     
     # Generate the bowtie2 index
     
-    if os.path.exists(f"{options.reference}.1.bt2") == False and os.path.exists(f"{options.temp_directory}/{options.reference.split('/')[-1]}.1.bt2") == False:
+    if os.path.exists(f"{options.output_directory}/star_index/genomeParameters.txt") == False and os.path.exists(f"{options.temp_directory}/star_index/genomeParameters.txt") == False:
         cmd = f"STAR --runMode genomeGenerate --runThreadN {options.cpu} --genomeFastaFiles {options.reference} --genomeDir {options.star_index}"
         cmd += f" 1> {options.star_index}.output"
         cmd += f" 2> {options.star_index}.error"
@@ -217,8 +217,9 @@ def main():
             os.system(cmd)
             
     
+        
     # Copy the reference index if it is not present
-    cmd = f"cp {options.temp_directory}/star_index {options.output_directory}"
+    cmd = f"cp -r {options.temp_directory}/star_index {options.output_directory}"
     os.system(cmd)
     
     for row in options.metadata:
