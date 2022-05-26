@@ -107,8 +107,7 @@ def main():
     access_key_raw = "ghp_fr6AvS8hayuREMOVETHISTEXTjmncOJqfLwgb0ueYXNk0hxnps"
     access_key = "".join(access_key_raw.split("REMOVETHISTEXT"))
     
-    os.environ["CR_PAT"] = access_key
-    os.system( f"echo $CR_PAT | docker login ghcr.io -u sagnikbanerjee15 --password-stdin" )
+    
     list_of_softwares_with_versions = {"samtools":"1.14",
                                        "trimmomatic":"0.39",
                                        "sratools":"3.0.0",
@@ -150,15 +149,18 @@ def main():
     
     print(framework_of_choice)
     if framework_of_choice == "docker":
+        os.environ["CR_PAT"] = access_key
+        os.system( f"echo $CR_PAT | docker login ghcr.io -u sagnikbanerjee15 --password-stdin" )
         for software in list_of_softwares_with_versions:
             version = list_of_softwares_with_versions[software]
             os.system( f"docker pull ghcr.io/sagnikbanerjee15/docker_tools_and_pipelines/{software}:{version}" )
     else:
+        os.environ["CR_PAT"] = access_key
+        os.system( f"echo $CR_PAT | singularity remote login -u sagnikbanerjee15 --password-stdin docker://ghcr.io" )
         for software in list_of_softwares_with_versions:
             version = list_of_softwares_with_versions[software]
             if os.path.exists(f"{options.output_directory}/singularity_images/{software}:{version}")==False:
-                print( f"singularity pull {options.output_directory}/singularity_images/{software}:{version} docker://ghcr.io/sagnikbanerjee15/docker_tools_and_pipelines/{software}:{version}" )
-                os.system( f"singularity pull {options.output_directory}/singularity_images/{software}:{version} docker://ghcr.io/sagnikbanerjee15/docker_tools_and_pipelines/{software}:{version}" )
+                os.system( f"singularity pull {options.output_directory}/singularity_images/{software}:{version} docker://ghcr.io/sagnikbanerjee15/dockerized_tools_and_pipelines/{software}:{version}" )
     ################################################################################################################################################################################################################################################
 
     ################################################################################################################################################################################################################################################
