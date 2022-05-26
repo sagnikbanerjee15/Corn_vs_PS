@@ -117,7 +117,7 @@ def main():
                                        "deseq2":"latest",
                                        "bowtie2":"2.4.5",
                                        "multiqc":"1.12",
-                                       "STAR":"2.7.9a"}
+                                       "star":"2.7.9a"}
 
     volumes_list = [f"{options.output_directory}:{options.output_directory}",
                     f"{options.temp_directory}:{options.temp_directory}",
@@ -199,7 +199,7 @@ def main():
         cmd += f" 1> {options.star_index}.output"
         cmd += f" 2> {options.star_index}.error"
         
-        software = "STAR"
+        software = "star"
         version = list_of_softwares_with_versions[software]
         runSingularityCommand(logging, 
                               "STAR", 
@@ -257,7 +257,7 @@ def main():
             cmd += f" 1> {options.output_directory}/alignments/{samplename}.output "
             cmd += f" 2> {options.output_directory}/alignments/{samplename}.error "
             
-            software = "STAR"
+            software = "star"
             version = list_of_softwares_with_versions[software]
             runSingularityCommand(logging, 
                                   "STAR", 
