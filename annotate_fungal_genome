@@ -312,6 +312,10 @@ def main():
                                   command = cmd, 
                                   cpus = options.cpu, 
                                   memory = '300g')
+        
+        cmd = f"rm {options.output_directory}/alignments/{samplename}_Unmapped* "
+        os.system(cmd)
+        
             
 if __name__ == "__main__":
     main()
