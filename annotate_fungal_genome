@@ -297,6 +297,8 @@ def main():
         cmd += f" --threads {options.cpu}"
         cmd += f" -k 101 "
         cmd += f" -o {options.denovo_assembly}/{samplename}_101 "
+        cmd += f" 1> {options.denovo_assembly}/{samplename}_101.output "
+        cmd += f" 2> {options.denovo_assembly}/{samplename}_101.error "
         
         software = "spades"
         version = list_of_softwares_with_versions[software]
