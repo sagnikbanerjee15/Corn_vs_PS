@@ -117,7 +117,8 @@ def main():
                                        "deseq2":"latest",
                                        "bowtie2":"2.4.5",
                                        "multiqc":"1.12",
-                                       "star":"2.7.9a"}
+                                       "star":"2.7.9a",
+                                       "spades":"3.15.4"}
 
     volumes_list = [f"{options.output_directory}:{options.output_directory}",
                     f"{options.temp_directory}:{options.temp_directory}",
@@ -172,6 +173,7 @@ def main():
     options.alignments = f"{options.output_directory}/alignments"
     os.system(f"mkdir -p {options.alignments}")
     os.system(f"mkdir -p {options.temp_directory}/alignments")
+    options.denovo_assembly = f"{options.output_directory}/denovo_assembly"
 
     ################################################################################################################################################################################################################################################
     # Read data from metadata file
@@ -191,9 +193,7 @@ def main():
     # Prepare genome indices
     ################################################################################################################################################################################################################################################
     
-    
-    # Generate the bowtie2 index
-    
+    # Generate the STAR index
     if os.path.exists(f"{options.output_directory}/star_index/genomeParameters.txt") == False and os.path.exists(f"{options.temp_directory}/star_index/genomeParameters.txt") == False:
         cmd = f"STAR --runMode genomeGenerate --runThreadN {options.cpu} --genomeFastaFiles {options.reference} --genomeDir {options.star_index}"
         cmd += f" 1> {options.star_index}.output"
@@ -223,13 +223,11 @@ def main():
     os.system(cmd)
     
     for row in options.metadata:
-        
         samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
-        
         ################################################################################################################################################################################################################################################
         # Align short reads to reference
         ################################################################################################################################################################################################################################################
-        if os.path.exists(f"{options.output_directory}/alignments/{samplename}.bam") == False and os.path.exists(f"{options.temp_directory}/alignments/{samplename}.bam") == False:
+        if os.path.exists(f"{options.output_directory}/alignments/{samplename}_Aligned.sortedByCoord.out.bam") == False and os.path.exists(f"{options.temp_directory}/alignments/{samplename}_Aligned.sortedByCoord.out.bam") == False:
             # Copy the raw data from the directory
             if ended == "SE":
                 cmd = f"cp {location}/{samplename}.fastq.gz {options.output_directory}/alignments"
@@ -279,6 +277,38 @@ def main():
                 
                 cmd = f"rm {options.output_directory}/alignments/{samplename}*gz"
                 os.system(cmd)
+    
+    # de nvo align the unmapped reads
+    for row in options.metadata:
+        samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
+        ################################################################################################################################################################################################################################################
+        # Move unmapped reads to working folder
+        ################################################################################################################################################################################################################################################
+        if os.path.exists(f"{options.denovo_assembly}/{samplename}") == False and os.path.exists(f"{options.temp_directory}/denovo_assembly/{samplename}") == False:
+            cmd = f"cp {options.temp_directory}/alignments/{samplename}_Unmapped* {options.output_directory}/alignments"
+            os.system(cmd)
+            
+        cmd  = f"spades.py "
+        if ended == "SE":
+            cmd += f" -s {options.output_directory}/alignment/{samplename}_Unmapped.out.mate "
+        else:
+            cmd += f" -1 {options.output_directory}/alignment/{samplename}_Unmapped.out.mate1 "
+            cmd += f" -2 {options.output_directory}/alignment/{samplename}_Unmapped.out.mate2 "
+        cmd += f" --threads {options.cpu}"
+        cmd += f" -k 101 "
+        cmd += f" -o {options.denovo_assembly}/{samplename}_101 "
+        
+        software = "spades"
+        version = list_of_softwares_with_versions[software]
+        runSingularityCommand(logging, 
+                                  "spades", 
+                                  version, 
+                                  image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                                  container_name = "spades_assembly",
+                                  volumes = volumes_list,
+                                  command = cmd, 
+                                  cpus = options.cpu, 
+                                  memory = '300g')
             
 if __name__ == "__main__":
     main()
