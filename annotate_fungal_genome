@@ -287,14 +287,23 @@ def main():
         if os.path.exists(f"{options.denovo_assembly}/{samplename}") == False and os.path.exists(f"{options.temp_directory}/denovo_assembly/{samplename}") == False:
             cmd = f"cp {options.temp_directory}/alignments/{samplename}_Unmapped* {options.output_directory}/alignments"
             os.system(cmd)
+            if ended == "SE":
+                cmd = f"mv {options.output_directory}/alignments/{samplename}_Unmapped.out.mate {options.output_directory}/alignments/{samplename}_Unmapped.out.mate.fq"
+                os.system(cmd)
+            else:
+                cmd = f"mv {options.output_directory}/alignments/{samplename}_Unmapped.out.mate1 {options.output_directory}/alignments/{samplename}_Unmapped.out.mate1.fq"
+                os.system(cmd)
+                
+                cmd = f"mv {options.output_directory}/alignments/{samplename}_Unmapped.out.mate2 {options.output_directory}/alignments/{samplename}_Unmapped.out.mate2.fq"
+                os.system(cmd)
             
         cmd  = f"spades.py "
         cmd += f" --rna "
         if ended == "SE":
-            cmd += f" -s {options.output_directory}/alignments/{samplename}_Unmapped.out.mate "
+            cmd += f" -s {options.output_directory}/alignments/{samplename}_Unmapped.out.mate.fq "
         else:
-            cmd += f" -1 {options.output_directory}/alignments/{samplename}_Unmapped.out.mate1 "
-            cmd += f" -2 {options.output_directory}/alignments/{samplename}_Unmapped.out.mate2 "
+            cmd += f" -1 {options.output_directory}/alignments/{samplename}_Unmapped.out.mate1.fq "
+            cmd += f" -2 {options.output_directory}/alignments/{samplename}_Unmapped.out.mate2.fq "
         cmd += f" --threads {options.cpu}"
         cmd += f" -k 101 "
         cmd += f" -o {options.denovo_assembly}/{samplename}_101 "
