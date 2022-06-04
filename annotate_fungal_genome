@@ -289,11 +289,12 @@ def main():
             os.system(cmd)
             
         cmd  = f"spades.py "
+        cmd += f" --rna "
         if ended == "SE":
-            cmd += f" -s {options.output_directory}/alignment/{samplename}_Unmapped.out.mate "
+            cmd += f" -s {options.output_directory}/alignments/{samplename}_Unmapped.out.mate "
         else:
-            cmd += f" -1 {options.output_directory}/alignment/{samplename}_Unmapped.out.mate1 "
-            cmd += f" -2 {options.output_directory}/alignment/{samplename}_Unmapped.out.mate2 "
+            cmd += f" -1 {options.output_directory}/alignments/{samplename}_Unmapped.out.mate1 "
+            cmd += f" -2 {options.output_directory}/alignments/{samplename}_Unmapped.out.mate2 "
         cmd += f" --threads {options.cpu}"
         cmd += f" -k 101 "
         cmd += f" -o {options.denovo_assembly}/{samplename}_101 "
