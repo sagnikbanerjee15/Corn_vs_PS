@@ -434,12 +434,12 @@ def main():
     # Generate CDHIT clusters
     cmd  = f"cd-hit-est "
     cmd += f" -i {options.denovo_assembly}/merged_transcripts.fasta "
-    cmd += f" -o {options.denovo_assembly}/merged_transcripts_cdhit_clusters "
+    cmd += f" -o {options.denovo_assembly}/merged_transcripts_cdhit_clusters_0.95 "
     cmd += f" -c 0.95 "
     cmd += f" -T {options.cpu} "
     cmd += f" -d 0 "
-    cmd += f" 1> {options.denovo_assembly}/merged_transcripts_cdhit_clusters.output "
-    cmd += f" 2> {options.denovo_assembly}/merged_transcripts_cdhit_clusters.error "
+    cmd += f" 1> {options.denovo_assembly}/merged_transcripts_cdhit_clusters_0.95.output "
+    cmd += f" 2> {options.denovo_assembly}/merged_transcripts_cdhit_clusters_0.95.error "
     
     software = "cdhit"
     version = list_of_softwares_with_versions[software]
