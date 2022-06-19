@@ -438,6 +438,7 @@ def main():
     cmd += f" -c 0.95 "
     cmd += f" -T {options.cpu} "
     cmd += f" -d 0 "
+    cmd += f" -M 5000 "
     cmd += f" 1> {options.denovo_assembly}/merged_transcripts_cdhit_clusters_0.95.output "
     cmd += f" 2> {options.denovo_assembly}/merged_transcripts_cdhit_clusters_0.95.error "
     
