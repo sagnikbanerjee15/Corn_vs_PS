@@ -434,26 +434,29 @@ def main():
     # Generate CDHIT clusters
     cmd  = f"cd-hit-est "
     cmd += f" -i {options.denovo_assembly}/merged_transcripts.fasta "
-    cmd += f" -o {options.denovo_assembly}/merged_transcripts_cdhit_clusters_0.95 "
-    cmd += f" -c 0.95 "
+    cmd += f" -o {options.denovo_assembly}/merged_transcripts_cdhit_clusters_0.90 "
+    cmd += f" -c 0.90 "
     cmd += f" -T {options.cpu} "
     cmd += f" -d 0 "
     cmd += f" -M 5000 "
-    cmd += f" 1> {options.denovo_assembly}/merged_transcripts_cdhit_clusters_0.95.output "
-    cmd += f" 2> {options.denovo_assembly}/merged_transcripts_cdhit_clusters_0.95.error "
+    cmd += f" 1> {options.denovo_assembly}/merged_transcripts_cdhit_clusters_0.90.output "
+    cmd += f" 2> {options.denovo_assembly}/merged_transcripts_cdhit_clusters_0.90.error "
     
-    software = "cdhit"
-    version = list_of_softwares_with_versions[software]
-    runSingularityCommand(logging, 
-                          "CDHIT", 
-                          version, 
-                          image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
-                          container_name = "star_alignment",
-                          volumes = volumes_list,
-                          command = cmd, 
-                          cpus = options.cpu, 
-                          memory = '100g')   
-            
+    if os.path.exists(f"{options.denovo_assembly}/merged_transcripts_cdhit_clusters_0.90.clstr") == False:
+        software = "cdhit"
+        version = list_of_softwares_with_versions[software]
+        runSingularityCommand(logging, 
+                              "CDHIT", 
+                              version, 
+                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                              container_name = "star_alignment",
+                              volumes = volumes_list,
+                              command = cmd, 
+                              cpus = options.cpu, 
+                              memory = '100g')   
+    
+    
+    
 if __name__ == "__main__":
     main()
     
