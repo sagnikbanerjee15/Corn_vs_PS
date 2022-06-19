@@ -425,10 +425,11 @@ def main():
             all_sequences[f"{sequence_id}_{cultivar}_{condition}_{timepoint}_{biological_replicate}"] = denovo_assembled_sequences[sequence_id]
             
     merged_filename = f"{options.denovo_assembly}/merged_transcripts.fasta"
-    fhw = open(merged_filename,"w")
-    for sequence_id in all_sequences:
-        fhw.write(f">{sequence_id}\n{all_sequences[sequence_id]}\n")
-    fhw.close()
+    if os.path.exists(merged_filename) == False:
+        fhw = open(merged_filename,"w")
+        for sequence_id in all_sequences:
+            fhw.write(f">{sequence_id}\n{all_sequences[sequence_id]}\n")
+        fhw.close()
     
     # Generate CDHIT clusters
     cmd  = f"cd-hit-est "
@@ -437,6 +438,8 @@ def main():
     cmd += f" -c 0.95 "
     cmd += f" -T {options.cpu} "
     cmd += f" -d 0 "
+    cmd += f" 1> {options.denovo_assembly}/merged_transcripts_cdhit_clusters.output "
+    cmd += f" 2> {options.denovo_assembly}/merged_transcripts_cdhit_clusters.error "
     
     software = "cdhit"
     version = list_of_softwares_with_versions[software]
