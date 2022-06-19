@@ -240,7 +240,7 @@ def main():
     os.system(f"mkdir -p {options.alignments}")
     os.system(f"mkdir -p {options.temp_directory}/alignments")
     options.denovo_assembly = f"{options.output_directory}/denovo_assembly"
-    os.system(f"mkdir -p {options.denovo_asembly}")
+    os.system(f"mkdir -p {options.denovo_assembly}")
     os.system(f"mkdir -p {options.temp_directory}/denovo_assembly")
 
     ################################################################################################################################################################################################################################################
