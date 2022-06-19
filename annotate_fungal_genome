@@ -352,7 +352,7 @@ def main():
         ################################################################################################################################################################################################################################################
         # Move unmapped reads to working folder
         ################################################################################################################################################################################################################################################
-        if os.path.exists(f"{options.denovo_assembly}/{samplename}") == False and os.path.exists(f"{options.temp_directory}/denovo_assembly/{samplename}") == False:
+        if os.path.exists(f"{options.denovo_assembly}/{samplename}_101") == False and os.path.exists(f"{options.temp_directory}/denovo_assembly/{samplename}_101") == False:
             cmd = f"cp {options.temp_directory}/alignments/{samplename}_Unmapped* {options.output_directory}/alignments"
             os.system(cmd)
             if ended == "SE":
