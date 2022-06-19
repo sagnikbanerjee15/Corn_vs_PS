@@ -111,19 +111,19 @@ SampleName,Ended,Cultivar,Condition,Timepoints,Replicate,Location
 110,PE,H95,Inoculated,7dpi,4,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
 111,PE,Rp1-I,Control,7dpi,4,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
 112,PE,Rp1-I,Inoculated,7dpi,4,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
-113,PE,Resting spores-CR1,,,,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
-114,PE,Resting spores-CR1,,,,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
-115,PE,Resting spores-CR1,,,,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
-116,PE,Resting spores-CR1,,,,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
-117,PE,Resting spores-CR1,,,,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
-118,PE,Germinated spores-CR1,,,,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
-119,PE,Germinated spores-CR1,,,,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
-120,PE,Germinated spores-CR1,,,,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
-121,PE,Germinated spores-CR1,,,,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
-122,PE,Germinated spores-CR1,,,,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
-123,PE,H95-pooled all uninfected time points and replicates,,,,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/SP
-124,PE,H95-pooled all infected time points and replicates,,,,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/SP
-125,PE,Rp1-I-pooled all uninfected time points and replicates,,,,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/SP
-126,PE,Rp1-I-pooled all infected time points and replicates,,,,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/SP
-127,PE,Resting spores-CR1-pooled all 5 replicates,,,,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/SP
-128,PE,Germinated spores-CR1-pooled all 5 replicates,,,,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/SP
+113,PE,CR1,Resting_spores,,1,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
+114,PE,CR1,Resting_spores,,2,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
+115,PE,CR1,Resting_spores,,3,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
+116,PE,CR1,Resting_spores,,4,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
+117,PE,CR1,Resting_spores,,5,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
+118,PE,CR1,Germinated_spores,,1,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
+119,PE,CR1,Germinated_spores,,2,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
+120,PE,CR1,Germinated_spores,,3,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
+121,PE,CR1,Germinated_spores,,4,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
+122,PE,CR1,Germinated_spores,,5,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/S2
+123,PE,H95,Control,All,0,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/SP
+124,PE,H95,Inoculated,All,0,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/SP
+125,PE,Rp1-I,Control,All,0,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/SP
+126,PE,Rp1-I,Inoculated,All,0,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/SP
+127,PE,CR1,Resting_spores,All,1,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/SP
+128,PE,CR1,Germinated_spores,All,1,/90daydata/maizegdb/sagnik/CORN_VS_PS/data/merged/SP

@@ -88,6 +88,71 @@ def runSingularityCommand( logging, name, version, image_location, container_nam
     os.system( singularity_cmd )
     logging.info( f"Running command - {singularity_cmd}" )
 
+def readMultiLineFastaFile(filename):
+    
+    fhr = open(filename,"r")
+    sequences = {}
+    while True:
+        line = fhr.readline()
+        if not line:break
+        if line[0] == ">":
+            sequence_id = line.strip()[1:]
+            sequences[sequence_id] = ""
+            continue
+        sequences[sequence_id] += line.strip()
+                
+    sequences[sequence_id] += line.strip()
+    fhr.close()
+    return sequences
+
+gencode = {
+      'ATA':'I', 'ATC':'I', 'ATT':'I', 'ATG':'M',
+      'ACA':'T', 'ACC':'T', 'ACG':'T', 'ACT':'T',
+      'AAC':'N', 'AAT':'N', 'AAA':'K', 'AAG':'K',
+      'AGC':'S', 'AGT':'S', 'AGA':'R', 'AGG':'R',
+      'CTA':'L', 'CTC':'L', 'CTG':'L', 'CTT':'L',
+      'CCA':'P', 'CCC':'P', 'CCG':'P', 'CCT':'P',
+      'CAC':'H', 'CAT':'H', 'CAA':'Q', 'CAG':'Q',
+      'CGA':'R', 'CGC':'R', 'CGG':'R', 'CGT':'R',
+      'GTA':'V', 'GTC':'V', 'GTG':'V', 'GTT':'V',
+      'GCA':'A', 'GCC':'A', 'GCG':'A', 'GCT':'A',
+      'GAC':'D', 'GAT':'D', 'GAA':'E', 'GAG':'E',
+      'GGA':'G', 'GGC':'G', 'GGG':'G', 'GGT':'G',
+      'TCA':'S', 'TCC':'S', 'TCG':'S', 'TCT':'S',
+      'TTC':'F', 'TTT':'F', 'TTA':'L', 'TTG':'L',
+      'TAC':'Y', 'TAT':'Y', 'TAA':'_', 'TAG':'_',
+      'TGC':'C', 'TGT':'C', 'TGA':'_', 'TGG':'W'}
+
+basepairs = {'A':'T', 'C':'G', 'G':'C', 'T':'A'}
+
+def translate_frameshifted( sequence ):
+    translate = ''.join([gencode.get(sequence[3*i:3*i+3],'X') for i in range(len(sequence)//3)])
+    return translate
+
+def reverse_complement( sequence ):
+    reversed_sequence = (sequence[::-1])
+    rc = ''.join([basepairs.get(reversed_sequence[i], 'X') for i in range(len(sequence))])
+    return rc
+
+def lengthOfLongestORF(sequence):
+    first_frame = translate_frameshifted(sequence[0:])
+    second_frame = translate_frameshifted(sequence[1:])
+    third_frame = translate_frameshifted(sequence[2:])
+    
+    rc_first_frame = translate_frameshifted(reverse_complement(sequence[0:]))
+    rc_second_frame = translate_frameshifted(reverse_complement(sequence[1:]))
+    rc_third_frame = translate_frameshifted(reverse_complement(sequence[2:]))
+    
+    translated_sequences = [first_frame,second_frame,third_frame,rc_first_frame,rc_second_frame,rc_third_frame]
+    max_length_of_segments = []
+    for translated_sequence in translated_sequences:
+        length_of_translated_segments = [len(segment) for segment in translated_sequence.split("_")]
+        max_length_of_segments.append(max(length_of_translated_segments))
+        
+    return max(max_length_of_segments)
+    
+    
+
 def main():
     options = parseCommandLineArguments()
     
@@ -118,7 +183,8 @@ def main():
                                        "bowtie2":"2.4.5",
                                        "multiqc":"1.12",
                                        "star":"2.7.9a",
-                                       "spades":"3.15.4"}
+                                       "spades":"3.15.4",
+                                       "cdhit":"4.8.1"}
 
     volumes_list = [f"{options.output_directory}:{options.output_directory}",
                     f"{options.temp_directory}:{options.temp_directory}",
@@ -174,6 +240,8 @@ def main():
     os.system(f"mkdir -p {options.alignments}")
     os.system(f"mkdir -p {options.temp_directory}/alignments")
     options.denovo_assembly = f"{options.output_directory}/denovo_assembly"
+    os.system(f"mkdir -p {options.denovo_asembly}")
+    os.system(f"mkdir -p {options.temp_directory}/denovo_assembly")
 
     ################################################################################################################################################################################################################################################
     # Read data from metadata file
@@ -278,7 +346,7 @@ def main():
                 cmd = f"rm {options.output_directory}/alignments/{samplename}*gz"
                 os.system(cmd)
     
-    # de nvo align the unmapped reads
+    # de novo align the unmapped reads
     for row in options.metadata:
         samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
         ################################################################################################################################################################################################################################################
@@ -310,21 +378,77 @@ def main():
         cmd += f" 1> {options.denovo_assembly}/{samplename}_101.output "
         cmd += f" 2> {options.denovo_assembly}/{samplename}_101.error "
         
-        software = "spades"
-        version = list_of_softwares_with_versions[software]
-        runSingularityCommand(logging, 
-                                  "spades", 
-                                  version, 
-                                  image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
-                                  container_name = "spades_assembly",
-                                  volumes = volumes_list,
-                                  command = cmd, 
-                                  cpus = options.cpu, 
-                                  memory = '300g')
+        if os.path.exists(f"{options.denovo_assembly}/{samplename}_101/transcripts.fasta") == False and os.path.exists(f"{options.temp_directory}/denovo_assembly/{samplename}_101/transcripts.fasta") == False:
+            software = "spades"
+            version = list_of_softwares_with_versions[software]
+            runSingularityCommand(logging, 
+                                      "spades", 
+                                      version, 
+                                      image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                                      container_name = "spades_assembly",
+                                      volumes = volumes_list,
+                                      command = cmd, 
+                                      cpus = options.cpu, 
+                                      memory = '300g')
         
         cmd = f"rm {options.output_directory}/alignments/{samplename}_Unmapped* "
         os.system(cmd)
         
+        if options.transfer:
+            cmd = f"mv {options.output_directory}/denovo_assembly/{samplename}_101* {options.temp_directory}/denovo_assembly"
+            os.system(cmd)
+    
+    # Generate a single transcriptome from unmapped reads
+    all_sequences = {}
+    for row in options.metadata:
+        samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
+        ################################################################################################################################################################################################################################################
+        # Copy assembled "transcripts" to working folder
+        ################################################################################################################################################################################################################################################
+        cmd = f"mkdir -p {options.denovo_assembly}/{samplename}_101"
+        os.system(cmd)
+        cmd = f"cp {options.temp_directory}/denovo_assembly/{samplename}_101/transcripts.fasta {options.denovo_assembly}/{samplename}_101/"
+        os.system(cmd)
+        
+        denovo_assembled_sequences = readMultiLineFastaFile(f"{options.denovo_assembly}/{samplename}_101/transcripts.fasta")
+        
+        # Remove sequences that have less than 100 aa
+        sequence_ids_to_be_removed = []
+        for sequence_id in denovo_assembled_sequences: 
+            if lengthOfLongestORF(denovo_assembled_sequences[sequence_id]) < 100:
+                sequence_ids_to_be_removed.append(sequence_id)
+        
+        for sequence_id in sequence_ids_to_be_removed:
+            del denovo_assembled_sequences[sequence_id]
+            
+        for sequence_id in denovo_assembled_sequences:
+            all_sequences[f"{sequence_id}_{cultivar}_{condition}_{timepoint}_{biological_replicate}"] = denovo_assembled_sequences[sequence_id]
+            
+    merged_filename = f"{options.denovo_assembly}/merged_transcripts.fasta"
+    fhw = open(merged_filename,"w")
+    for sequence_id in all_sequences:
+        fhw.write(f">{sequence_id}\n{all_sequences[sequence_id]}\n")
+    fhw.close()
+    
+    # Generate CDHIT clusters
+    cmd  = f"cd-hit-est "
+    cmd += f" -i {options.denovo_assembly}/merged_transcripts.fasta "
+    cmd += f" -o {options.denovo_assembly}/merged_transcripts_cdhit_clusters "
+    cmd += f" -c 0.95 "
+    cmd += f" -T {options.cpu} "
+    cmd += f" -d 0 "
+    
+    software = "cdhit"
+    version = list_of_softwares_with_versions[software]
+    runSingularityCommand(logging, 
+                          "CDHIT", 
+                          version, 
+                          image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                          container_name = "star_alignment",
+                          volumes = volumes_list,
+                          command = cmd, 
+                          cpus = options.cpu, 
+                          memory = '100g')   
             
 if __name__ == "__main__":
     main()
