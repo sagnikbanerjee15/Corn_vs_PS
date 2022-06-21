@@ -16,6 +16,7 @@
 #SBATCH --error=/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation.error
 
 module load singularity
+module load python/3.9.2
 
 ROOT_DIR="/project/maizegdb/sagnik/CORN_VS_PS"
 TEMP_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS"
