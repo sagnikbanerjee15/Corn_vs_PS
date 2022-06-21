@@ -1,0 +1,33 @@
+#!/bin/bash
+
+#SBATCH -n 40
+#SBATCH -N 1
+#SBATCH --partition=atlas
+##SBATCH --partition=priority-mem768
+#SBATCH -A maizegdb
+#SBATCH --mem=300G
+#SBATCH --time=2-00:00:00
+#SBATCH --job-name="Annotate_Fungal_Genome"
+#SBATCH --mail-user=sagnikbanerjee15@gmail.com
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
+#SBATCH --output=/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation.output
+#SBATCH --error=/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation.error
+
+module load singularity
+
+ROOT_DIR="/project/maizegdb/sagnik/CORN_VS_PS"
+TEMP_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS"
+REF_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS/data/reference"
+
+${ROOT_DIR}/Corn_vs_PS/annotate_fungal_genome \
+--metadatafilename ${ROOT_DIR}/Corn_vs_PS/metadata.csv \
+--output_directory ${ROOT_DIR}/data/PS_SALSA_annotation \
+--reference ${REF_DIR}/combined_B73_PS_SALSA/genome.fasta \
+--cpu 40 \
+--temp_directory ${TEMP_DIR}/PS_SALSA_annotation \
+--transfer \
+--framework singularity \
+1> ${ROOT_DIR}/data/PS_SALSA_annotation.output \
+2> ${ROOT_DIR}/data/PS_SALSA_annotation.error
