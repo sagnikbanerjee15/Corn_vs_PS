@@ -443,7 +443,7 @@ def main():
     cmd += f" 1> {options.denovo_assembly}/merged_transcripts_cdhit_clusters_{cluster_similarity}.output "
     cmd += f" 2> {options.denovo_assembly}/merged_transcripts_cdhit_clusters_{cluster_similarity}.error "
     
-    if os.path.exists(f"{options.denovo_assembly}/merged_transcripts_cdhit_clusters_0.90.clstr") == False:
+    if os.path.exists(f"{options.denovo_assembly}/merged_transcripts_cdhit_clusters_{cluster_similarity}.clstr") == False:
         software = "cdhit"
         version = list_of_softwares_with_versions[software]
         runSingularityCommand(logging, 
