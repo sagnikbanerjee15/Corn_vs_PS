@@ -283,7 +283,5 @@ def main():
                 
             # Call function here for checking each read
             
-
-
 if __name__ == "__main__":
     main()

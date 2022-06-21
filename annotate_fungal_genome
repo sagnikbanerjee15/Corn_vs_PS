@@ -432,15 +432,16 @@ def main():
         fhw.close()
     
     # Generate CDHIT clusters
+    cluster_similarity = 0.90
     cmd  = f"cd-hit-est "
     cmd += f" -i {options.denovo_assembly}/merged_transcripts.fasta "
-    cmd += f" -o {options.denovo_assembly}/merged_transcripts_cdhit_clusters_0.90 "
-    cmd += f" -c 0.90 "
+    cmd += f" -o {options.denovo_assembly}/merged_transcripts_cdhit_clusters_{cluster_similarity} "
+    cmd += f" -c {cluster_similarity} "
     cmd += f" -T {options.cpu} "
     cmd += f" -d 0 "
     cmd += f" -M 5000 "
-    cmd += f" 1> {options.denovo_assembly}/merged_transcripts_cdhit_clusters_0.90.output "
-    cmd += f" 2> {options.denovo_assembly}/merged_transcripts_cdhit_clusters_0.90.error "
+    cmd += f" 1> {options.denovo_assembly}/merged_transcripts_cdhit_clusters_{cluster_similarity}.output "
+    cmd += f" 2> {options.denovo_assembly}/merged_transcripts_cdhit_clusters_{cluster_similarity}.error "
     
     if os.path.exists(f"{options.denovo_assembly}/merged_transcripts_cdhit_clusters_0.90.clstr") == False:
         software = "cdhit"
