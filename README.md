@@ -65,9 +65,7 @@ All other software installations will be provided through singularity. Nothing e
 
 # Plan of action
 
-1. 
-
-a. Designing a pipeline to detect differentially expressed genes from RNA-Seq data. For this run, we used a combined reference of B73 AGPv4 and Argentina PS isolate. Once FINDER returns the gene models for the IA16 isolate, we will repeat this process all over again with combined reference comprising of B73 AGPv4 and IA16 PS isolate.
+## 1. a. Designing a pipeline to detect differentially expressed genes from RNA-Seq data. For this run, we used a combined reference of B73 AGPv4 and Argentina PS isolate. Once FINDER returns the gene models for the IA16 isolate, we will repeat this process all over again with combined reference comprising of B73 AGPv4 and IA16 PS isolate.
 
 Deliver an end-to-end pipeline (written in python and deployed with singularity/docker). The pipeline will perform the following tasks:
 
@@ -78,13 +76,13 @@ Deliver an end-to-end pipeline (written in python and deployed with singularity/
 * Accumulate counts from all the salmon executions [Done]
 * Apply the DESeq2 model
 
-b. Perform differential gene analysis between the resting spores and the germinating spores using 5 biological replicates from S2.
+## 1b. Perform differential gene analysis between the resting spores and the germinating spores using 5 biological replicates from S2 against IA16.
 
-2. Verify the fungal reference genome [Done]
+## 2. Verify the fungal reference genome [Done]
 
 Verification was perfomed by mapping RNA-Seq data (samples 113-122) from S2 and Sample 5 & 6 from SP to the genome assembled by K Holan. We found that salsa_phase_hic was the best.
 
-3. Annotate the reference genomes with FINDER
+## 3. Annotate the reference genomes with FINDER
 
 * Preparing reference indices - B73 AGPv4 and IA16 [Done]
 * Align reads to reference using STAR [Done]
@@ -95,13 +93,13 @@ Verification was perfomed by mapping RNA-Seq data (samples 113-122) from S2 and 
 * Run PsiClass on the mapped data and obtain gene models
 * Prepare final annotation files (GTF and FASTA) after removing Plant reads. Fasta file will contain transcripts from both mapped and unmapped reads.
 
-4. Perform final clean up and deliver the results
+## 4. Perform final clean up and deliver the results
 
 
 # Workflow
 
 1. Execute the program `mergeDataFromTwoLanesAndRenameRawFiles` to merge data from 2 lanes. Please note that this program will work only for this project. The program assumes that the same sample will have the same name in both the lanes and that the sampoles are paired ended. It uses the filenames to merge them. Then it will rename the file to something short. Please note that the renaming convention was chosen to be meaningful for this project only. Please review the code and make meaningful changes to it if you wish to reuse it for other projects. DO NOT execute as is.
 
-2. The reference consisted of transcripts from B73 and Argentina PS isolate. Short reads were aligned to the merged reference using bowtie2 and salmon was used to estimate gene counts. Custom script was written up to accumulate the gene counts from salmon output. DESeq2 will be used to determine the genes that are differentially expressed. No trimmining of reads was performed.
+2. The reference consisted of transcripts from B73 and Argentina PS isolate. Short reads were aligned to the merged reference using bowtie2 and salmon was used to estimate gene counts. Custom script was written up to accumulate the gene counts from salmon output. DESeq2 will be used to determine the genes that are differentially expressed. No trimmining of reads was performed
 
 
