@@ -86,7 +86,14 @@ Verification was perfomed by mapping RNA-Seq data (samples 113-122) from S2 and 
 
 3. Annotate the reference genomes with FINDER
 
-
+* Preparing reference indices - B73 AGPv4 and IA16 [Done]
+* Align reads to reference using STAR [Done]
+* Use Spades to denovo assemble unmapped reads [Done]
+* Use CD-HIT to cluster all the assembled transcripts [Done for thresholds - 0.95 & 0.90, Yet to run 0.75, 0.80 & 0.85]
+* Rerun CD-HIT on representative transcripts collected from each cluster
+* Run BLAST with NT and discard transcripts that have no hits
+* Run PsiClass on the mapped data and obtain gene models
+* Prepare final annotation files (GTF and FASTA) after removing Plant reads. Fasta file will contain transcripts from both mapped and unmapped reads.
 
 4. Perform final clean up and deliver the results
 
