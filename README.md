@@ -82,7 +82,7 @@ Deliver an end-to-end pipeline (written in python and deployed with singularity/
 
 Verification was perfomed by mapping RNA-Seq data (samples 113-122) from S2 and Sample 5 & 6 from SP to the genome assembled by K Holan. We found that salsa_phase_hic was the best.
 
-## 3. Annotate the reference genomes with FINDER
+## 3. Annotate the reference genomes with FINDER [Deliver by End July]
 
 * Preparing reference indices - B73 AGPv4 and IA16 [Done]
 * Align reads to reference using STAR [Done]

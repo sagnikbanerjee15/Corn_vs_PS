@@ -431,7 +431,7 @@ def main():
         fhw.close()
     
     # Generate CDHIT clusters
-    cluster_similarity = 0.85
+    cluster_similarity = 0.80
     cmd  = f"cd-hit-est "
     cmd += f" -i {options.denovo_assembly}/merged_transcripts.fasta "
     cmd += f" -o {options.denovo_assembly}/merged_transcripts_cdhit_clusters_{cluster_similarity} "
