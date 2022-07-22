@@ -247,10 +247,10 @@ def main():
     os.system(f"mkdir -p {options.fungal_alignments}")
     os.system(f"mkdir -p {options.temp_directory}/fungal_alignments")
     logging.info("Directories have been created")
-    options.psiclass_assembly_replicates_merged = f"{options.output_directory}/psiclass_assembly_replicates_merged"
+    options.psiclass_assembly_replicates_merged = f"{options.output_directory}/psiclass_assembly_replicates_merged/psiclass_output"
     os.system(f"mkdir -p {options.psiclass_assembly_replicates_merged}")
     os.system(f"mkdir -p {options.temp_directory}/psiclass_assembly_replicates_merged")
-    options.psiclass_assembly_replicates_separate = f"{options.output_directory}/psiclass_assembly_replicates_separate"
+    options.psiclass_assembly_replicates_separate = f"{options.output_directory}/psiclass_assembly_replicates_separate/psiclass_output"
     os.system(f"mkdir -p {options.psiclass_assembly_replicates_separate}")
     os.system(f"mkdir -p {options.temp_directory}/psiclass_assembly_replicates_separate")
 
