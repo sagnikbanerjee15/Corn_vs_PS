@@ -494,10 +494,10 @@ def main():
     for row in options.metadata:
         samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
         
-        bamfilename = f"{options.output_directory}/alignments/{samplename}_Aligned.sorted.out.bam"
-        samfilename = f"{options.output_directory}/alignments/{samplename}_Aligned.sorted.out.sam"
-        samfilename_only_fungal_alignments = f"{options.output_directory}/fungal_alignments/{samplename}_Aligned.sorted.out.sam"
-        bamfilename_only_fungal_alignments = f"{options.output_directory}/fungal_alignments/{samplename}_Aligned.sorted.out.sam"
+        bamfilename = f"{options.output_directory}/alignments/{samplename}_Aligned.sortedByCoord.out.bam"
+        samfilename = f"{options.output_directory}/alignments/{samplename}_Aligned.sortedByCoord.out.sam"
+        samfilename_only_fungal_alignments = f"{options.output_directory}/fungal_alignments/{samplename}_Aligned.sortedByCoord.out.sam"
+        bamfilename_only_fungal_alignments = f"{options.output_directory}/fungal_alignments/{samplename}_Aligned.sortedByCoord.out.sam"
         
         if os.path.exists(f"{options.temp_directory}/fungal_alignments/{samplename}_Aligned.sorted.out.sam") == True or os.path.exists(bamfilename_only_fungal_alignments) == True:
             continue
