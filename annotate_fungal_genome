@@ -555,7 +555,7 @@ def main():
             os.system(cmd)
         
         # Remove intermediate files
-        cmd = f"rm {options.output_directory}/alignments/{samplename}_Aligned.sorted.out.*am"
+        cmd = f"rm {options.output_directory}/alignments/{samplename}_Aligned.sortedByCoord.out.*am"
         os.system(cmd)
         
         cmd = f"rm {samfilename_only_fungal_alignments}"
