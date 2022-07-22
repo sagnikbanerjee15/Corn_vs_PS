@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH -n 40
+#SBATCH -n 72
 #SBATCH -N 1
 #SBATCH --partition=long
 ##SBATCH --partition=priority-mem768
@@ -27,7 +27,7 @@ ${ROOT_DIR}/Corn_vs_PS/find_differentially_expressed_genes \
 --output_directory ${ROOT_DIR}/data/analysis_with_argentinian_isolate \
 --temp_directory ${TEMP_DIR} \
 --framework singularity \
---cpu 40 \
+--cpu 72 \
 --reference ${REF_DIR}/transcripts.fasta \
 --gene_to_transcript_map ${REF_DIR}/transcriptome.gtf \
 1> ${ROOT_DIR}/data/analysis_with_argentinian_isolate.output \
