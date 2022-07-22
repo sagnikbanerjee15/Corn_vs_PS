@@ -522,7 +522,7 @@ def main():
         
         # Extract the alignments to the fungal reference
         fhr = open(samfilename, "r")
-        fhw = open(samfilename_only_fungal_alignments, "r")
+        fhw = open(samfilename_only_fungal_alignments, "w")
         for line in fhr:
             if line[0] == "@":
                 if "@HD" in line:
