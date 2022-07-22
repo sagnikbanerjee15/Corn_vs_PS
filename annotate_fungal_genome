@@ -28,6 +28,7 @@ def parseCommandLineArguments():
     required_named.add_argument( "-metadatafilename", "--metadatafilename", help = "Enter the metadata file. The file format should be same as ListOfNCBI-SRASamplesForExperimentST.csv", required = True )
     required_named.add_argument( "-output_directory", "--output_directory", help = "Enter the name of the output directory. all analysis will be stored here. Please make sure you have sufficient space on your disk to reproduce all the analysis", required = True )
     required_named.add_argument( "-reference", "--reference", help = "Enter the name of the genome file in fasta format", required = True)
+    required_named.add_argument( "--ps_reference", "--ps_reference", help = "Enter the name of the fungal reference genoem", required = True)
 
     ##################################################################################################
     # Optional arguments
@@ -241,6 +242,9 @@ def main():
     options.denovo_assembly = f"{options.output_directory}/denovo_assembly"
     os.system(f"mkdir -p {options.denovo_assembly}")
     os.system(f"mkdir -p {options.temp_directory}/denovo_assembly")
+    options.fungal_alignments = f"{options.output_directory}/fungal_alignments"
+    os.system(f"mkdir -p {options.fungal_alignments}")
+    os.system(f"mkdir -p {options.temp_directory}/fungal_alignments")
 
     ################################################################################################################################################################################################################################################
     # Read data from metadata file
@@ -397,7 +401,10 @@ def main():
             cmd = f"mv {options.output_directory}/denovo_assembly/{samplename}_101* {options.temp_directory}/denovo_assembly"
             os.system(cmd)
     
+    ################################################################################################################################################################################################################################################
     # Generate a single transcriptome from unmapped reads
+    ################################################################################################################################################################################################################################################
+    
     all_sequences = {}
     for row in options.metadata:
         samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
@@ -453,8 +460,91 @@ def main():
                               volumes = volumes_list,
                               command = cmd, 
                               cpus = options.cpu, 
-                              memory = '100g')   
+                              memory = '100g')  
     
+    ################################################################################################################################################################################################################################################
+    # Extract alignments to the fungal references
+    ################################################################################################################################################################################################################################################
+    
+    # Read in the sequence ids in the fungal reference
+    fungal_references = []
+    fhr = open(options.ps_reference, "r")
+    for line in fhr:
+        if line[0] == ">":
+            fungal_references.append(line.strip()[1:])
+    fhr.close()
+    fungal_references = set(fungal_references)
+    
+    for row in options.metadata:
+        samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
+        
+        bamfilename = f"{options.output_directory}/alignments/{samplename}_Aligned.sorted.out.bam"
+        samfilename = f"{options.output_directory}/alignments/{samplename}_Aligned.sorted.out.sam"
+        samfilename_only_fungal_alignments = f"{options.output_directory}/fungal_alignments/{samplename}_Aligned.sorted.out.sam"
+        bamfilename_only_fungal_alignments = f"{options.output_directory}/fungal_alignments/{samplename}_Aligned.sorted.out.sam"
+        
+        if os.path.exists(f"{options.temp_directory}/fungal_alignments/{samplename}_Aligned.sorted.out.sam") == True or os.path.exists(bamfilename_only_fungal_alignments) == True:
+            continue
+        
+        if os.path.exists(f"{options.temp_directory}/alignments/{samplename}_Aligned.sortedByCoord.out.bam") == True and os.path.exists(f"{options.output_directory}/alignments/{samplename}_Aligned.sorted.out.bam") == False:
+            cmd = f"cp {options.temp_directory}/alignments/{samplename}_Aligned.sortedByCoord.out.bam {options.output_directory}/alignments/"
+            os.system(cmd)
+        
+        
+        
+        # Convert the bamfile to samfile
+        cmd = f"samtools view -@ {options.cpu} -h {bamfilename} > {samfilename}"
+        software = "samtools"
+        version = list_of_softwares_with_versions[software]
+        runSingularityCommand(logging, 
+                              "STAR", 
+                              version, 
+                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                              container_name = "samtools_convert_bam_to_sam", 
+                              volumes = volumes_list,
+                              command = cmd, 
+                              cpus = options.cpu, 
+                              memory = '100g')
+        
+        # Extract the alignments to the fungal reference
+        fhr = open(samfilename, "r")
+        fhw = open(samfilename_only_fungal_alignments, "r")
+        for line in fhr:
+            if line[0] == "@":
+                if "@HD" in line:
+                    fhw.write(line)
+                elif line.strip().split("SN:")[-1].split()[0] in fungal_references:
+                    fhw.write(line)
+            else:
+                if line.strip().split()[2] in fungal_references:
+                    fhw.write(line)
+        fhw.close()
+        fhr.close()
+        
+        # Convert the extracted samfile to bamfile
+        cmd = f"samtools view -@ {options.cpu} -bS {samfilename_only_fungal_alignments} > {bamfilename_only_fungal_alignments}"
+        version = list_of_softwares_with_versions[software]
+        runSingularityCommand(logging, 
+                              "STAR", 
+                              version, 
+                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                              container_name = "samtools_convert_sam_to_bam", 
+                              volumes = volumes_list,
+                              command = cmd, 
+                              cpus = options.cpu, 
+                              memory = '100g')
+        
+        
+        if options.transfer:
+            cmd = f"mv {bamfilename_only_fungal_alignments} {options.temp_directory}/fungal_alignments"
+            os.system(cmd)
+        
+        # Remove intermediate files
+        cmd = f"rm {options.output_directory}/alignments/{samplename}_Aligned.sorted.out.*am"
+        os.system(cmd)
+        
+        cmd = f"rm {samfilename_only_fungal_alignments}"
+        os.system(cmd)
     
     
 if __name__ == "__main__":

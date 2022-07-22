@@ -87,7 +87,7 @@ Verification was perfomed by mapping RNA-Seq data (samples 113-122) from S2 and 
 * Preparing reference indices - B73 AGPv4 and IA16 [Done]
 * Align reads to reference using STAR [Done]
 * Use Spades to denovo assemble unmapped reads [Done]
-* Use CD-HIT to cluster all the assembled transcripts [Done for thresholds - 0.95 & 0.90, Yet to run 0.75, 0.80 & 0.85]
+* Use CD-HIT to cluster all the assembled transcripts [Done for thresholds - 0.95 & 0.90, 0.85 & 0.80]
 * Rerun CD-HIT on representative transcripts collected from each cluster
 * Run BLAST with NT and discard transcripts that have no hits
 * Run PsiClass on the mapped data and obtain gene models
@@ -101,5 +101,15 @@ Verification was perfomed by mapping RNA-Seq data (samples 113-122) from S2 and 
 1. Execute the program `mergeDataFromTwoLanesAndRenameRawFiles` to merge data from 2 lanes. Please note that this program will work only for this project. The program assumes that the same sample will have the same name in both the lanes and that the sampoles are paired ended. It uses the filenames to merge them. Then it will rename the file to something short. Please note that the renaming convention was chosen to be meaningful for this project only. Please review the code and make meaningful changes to it if you wish to reuse it for other projects. DO NOT execute as is.
 
 2. The reference consisted of transcripts from B73 and Argentina PS isolate. Short reads were aligned to the merged reference using bowtie2 and salmon was used to estimate gene counts. Custom script was written up to accumulate the gene counts from salmon output. DESeq2 will be used to determine the genes that are differentially expressed. No trimmining of reads was performed
+
+# PS IA16 Genome Annotation
+
+1. Raw reads from all 128 samples were mapped to both AGPv4 and the PS genome using STAR (v2.7.9a). Each execution produced a mapped file in bam format and unmapped reads were output also.
+
+2. Unmapped reads were assembled denovo using spades (v3.15.4) with kmer length set to 101. No other de novo assemblers were explored to reduce complexity.
+
+3. De novo assembled sequences from all 128 samples were merged together. CD-HIT (v4.8.1) was used to cluster them at a threshold of 0.8
+
+4. 
 
 
