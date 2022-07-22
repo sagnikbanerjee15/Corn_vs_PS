@@ -247,6 +247,12 @@ def main():
     os.system(f"mkdir -p {options.fungal_alignments}")
     os.system(f"mkdir -p {options.temp_directory}/fungal_alignments")
     logging.info("Directories have been created")
+    options.psiclass_assembly_replicates_merged = f"{options.output_directory}/psiclass_assembly_replicates_merged"
+    os.system(f"mkdir -p {options.psiclass_assembly_replicates_merged}")
+    os.system(f"mkdir -p {options.temp_directory}/psiclass_assembly_replicates_merged")
+    options.psiclass_assembly_replicates_separate = f"{options.output_directory}/psiclass_assembly_replicates_separate"
+    os.system(f"mkdir -p {options.psiclass_assembly_replicates_separate}")
+    os.system(f"mkdir -p {options.temp_directory}/psiclass_assembly_replicates_separate")
 
     ################################################################################################################################################################################################################################################
     # Read data from metadata file
@@ -501,10 +507,10 @@ def main():
         samfilename_only_fungal_alignments = f"{options.output_directory}/fungal_alignments/{samplename}_Aligned.sortedByCoord.out.sam"
         bamfilename_only_fungal_alignments = f"{options.output_directory}/fungal_alignments/{samplename}_Aligned.sortedByCoord.out.bam"
         
-        if os.path.exists(f"{options.temp_directory}/fungal_alignments/{samplename}_Aligned.sorted.out.bam") == True or os.path.exists(bamfilename_only_fungal_alignments) == True:
+        if os.path.exists(f"{options.temp_directory}/fungal_alignments/{samplename}_Aligned.sortedByCoord.out.bam") == True or os.path.exists(bamfilename_only_fungal_alignments) == True:
             continue
         
-        if os.path.exists(f"{options.temp_directory}/alignments/{samplename}_Aligned.sortedByCoord.out.bam") == True and os.path.exists(f"{options.output_directory}/alignments/{samplename}_Aligned.sorted.out.bam") == False:
+        if os.path.exists(f"{options.temp_directory}/alignments/{samplename}_Aligned.sortedByCoord.out.bam") == True and os.path.exists(f"{options.output_directory}/alignments/{samplename}_Aligned.sortedByCoord.out.bam") == False:
             cmd = f"cp {options.temp_directory}/alignments/{samplename}_Aligned.sortedByCoord.out.bam {options.output_directory}/alignments/"
             os.system(cmd)
         
@@ -568,8 +574,65 @@ def main():
     # Generate fungal genome assembly
     ################################################################################################################################################################################################################################################
     
+    # Copy all fungal bam files to output directory
+    os.system(f"cp {options.temp_directory}/fungal_alignments/* {options.output_directory}/fungal_alignments")
     
+    # Compile a list of bam files
     
+    fhw = open(f"{options.output_directory}/fungal_alignments/list_of_bam_files_replicates_separate")
+    for row in options.metadata:
+        samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
+        fhw.write(f"{options.output_directory}/fungal_alignments/{samplename}_Aligned.sortedByCoord.out.bam"+"\n")
+    fhw.close()
+    
+    # Replicates not merged
+    cmd  = f" psiclass "
+    cmd += f" --lb {options.output_directory}/fungal_alignments/list_of_bam_files_replicates_separate "
+    cmd += f" -o {options.psiclass_assembly_replicates_separate}"
+    cmd += f" -p {options.cpu}"
+    cmd += f" --primaryParalog "
+    software = "psiclass"
+    version = list_of_softwares_with_versions[software]
+    runSingularityCommand(logging, 
+                          "psiclass_replicates_separate", 
+                          version, 
+                          image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                          container_name = "gg_assembly_psiclass", 
+                          volumes = volumes_list,
+                          command = cmd, 
+                          cpus = options.cpu, 
+                          memory = '100g')
+    
+    # Merge replicates
+    replicates_group = {}
+    for row in options.metadata:
+        samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
+        if f"{cultivar}~{condition}~{timepoint}" not in replicates_group:
+            replicates_group[f"{cultivar}~{condition}~{timepoint}"] = []
+        replicates_group[f"{cultivar}~{condition}~{timepoint}"].append(samplename)
+        
+    print(replicates_group)
+    return
+    for category in replicates_group:
+        merged_bamfilename = f"{options.output_directory}/fungal_alignments/{category}.bam"
+        
+        cmd  = f" samtools merge "
+        cmd += f" -@ {options.cpu} "
+        cmd += f" {merged_bamfilename} "
+        for samplename in replicates_group[category]:
+            cmd += f" {options.output_directory}/fungal_alignments/{samplename}_Aligned.sortedByCoord.out.bam "
+        
+        software = "samtools"
+        version = list_of_softwares_with_versions[software]
+        runSingularityCommand(logging, 
+                              "samtools", 
+                              version, 
+                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                              container_name = "samtools_merge", 
+                              volumes = volumes_list,
+                              command = cmd, 
+                              cpus = options.cpu, 
+                              memory = '100g')
     
 if __name__ == "__main__":
     main()
