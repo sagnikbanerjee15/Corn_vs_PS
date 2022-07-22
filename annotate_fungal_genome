@@ -490,6 +490,8 @@ def main():
             fungal_references.append(line.strip()[1:])
     fhr.close()
     fungal_references = set(fungal_references)
+    print(fungal_references)
+    sys.stdout.flush()
     
     for row in options.metadata:
         samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
