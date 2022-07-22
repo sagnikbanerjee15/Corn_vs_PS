@@ -225,7 +225,7 @@ def main():
     os.system(cmd)
     
     
-    for row in options.metadata:
+    for row in options.metadata[::-1]:
         
         samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
         
