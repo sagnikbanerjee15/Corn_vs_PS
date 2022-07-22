@@ -501,7 +501,7 @@ def main():
         samfilename_only_fungal_alignments = f"{options.output_directory}/fungal_alignments/{samplename}_Aligned.sortedByCoord.out.sam"
         bamfilename_only_fungal_alignments = f"{options.output_directory}/fungal_alignments/{samplename}_Aligned.sortedByCoord.out.bam"
         
-        if os.path.exists(f"{options.temp_directory}/fungal_alignments/{samplename}_Aligned.sorted.out.sam") == True or os.path.exists(bamfilename_only_fungal_alignments) == True:
+        if os.path.exists(f"{options.temp_directory}/fungal_alignments/{samplename}_Aligned.sorted.out.bam") == True or os.path.exists(bamfilename_only_fungal_alignments) == True:
             continue
         
         if os.path.exists(f"{options.temp_directory}/alignments/{samplename}_Aligned.sortedByCoord.out.bam") == True and os.path.exists(f"{options.output_directory}/alignments/{samplename}_Aligned.sorted.out.bam") == False:
