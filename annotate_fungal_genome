@@ -185,7 +185,8 @@ def main():
                                        "multiqc":"1.12",
                                        "star":"2.7.9a",
                                        "spades":"3.15.4",
-                                       "cdhit":"4.8.1"}
+                                       "cdhit":"4.8.1",
+                                       "psiclass":"1.0.3"}
 
     volumes_list = [f"{options.output_directory}:{options.output_directory}",
                     f"{options.temp_directory}:{options.temp_directory}",
@@ -245,6 +246,7 @@ def main():
     options.fungal_alignments = f"{options.output_directory}/fungal_alignments"
     os.system(f"mkdir -p {options.fungal_alignments}")
     os.system(f"mkdir -p {options.temp_directory}/fungal_alignments")
+    logging.info("Directories have been created")
 
     ################################################################################################################################################################################################################################################
     # Read data from metadata file
@@ -282,12 +284,13 @@ def main():
                               cpus = options.cpu, 
                               memory = '100g')
         
+        
         # Move the star index to the temp directory if a transfer is requested
         if (options.transfer):
             cmd = f"mv {options.star_index} {options.temp_directory}"
             os.system(cmd)
             
-    
+    logging.info("STAR index has been generated")
         
     # Copy the reference index if it is not present
     cmd = f"cp -r {options.temp_directory}/star_index {options.output_directory}"
@@ -339,6 +342,7 @@ def main():
                                   command = cmd, 
                                   cpus = options.cpu, 
                                   memory = '100g')
+            logging.info(f"STAR alignment completed for sample no {samplename}")
             if options.transfer:
                 cmd = f"mv {options.output_directory}/alignments/{samplename}*.bam {options.temp_directory}/alignments/"
                 os.system(cmd)
@@ -348,6 +352,8 @@ def main():
                 
                 cmd = f"rm {options.output_directory}/alignments/{samplename}*gz"
                 os.system(cmd)
+                
+    logging.info("All STAR alignments are completed")
     
     # de novo align the unmapped reads
     for row in options.metadata:
@@ -380,6 +386,7 @@ def main():
         cmd += f" -o {options.denovo_assembly}/{samplename}_101 "
         cmd += f" 1> {options.denovo_assembly}/{samplename}_101.output "
         cmd += f" 2> {options.denovo_assembly}/{samplename}_101.error "
+        logging.info(f"De novo assembly generation completed for {samplename}")
         
         if os.path.exists(f"{options.denovo_assembly}/{samplename}_101/transcripts.fasta") == False and os.path.exists(f"{options.temp_directory}/denovo_assembly/{samplename}_101/transcripts.fasta") == False:
             software = "spades"
@@ -400,67 +407,72 @@ def main():
         if options.transfer:
             cmd = f"mv {options.output_directory}/denovo_assembly/{samplename}_101* {options.temp_directory}/denovo_assembly"
             os.system(cmd)
+    logging.info("All denovo assembly generation is completed")
     
     ################################################################################################################################################################################################################################################
     # Generate a single transcriptome from unmapped reads
     ################################################################################################################################################################################################################################################
     
-    all_sequences = {}
-    for row in options.metadata:
-        samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
-        ################################################################################################################################################################################################################################################
-        # Copy assembled "transcripts" to working folder
-        ################################################################################################################################################################################################################################################
-        cmd = f"mkdir -p {options.denovo_assembly}/{samplename}_101"
-        os.system(cmd)
-        cmd = f"cp {options.temp_directory}/denovo_assembly/{samplename}_101/transcripts.fasta {options.denovo_assembly}/{samplename}_101/"
-        os.system(cmd)
-        
-        denovo_assembled_sequences = readMultiLineFastaFile(f"{options.denovo_assembly}/{samplename}_101/transcripts.fasta")
-        
-        # Remove sequences that have less than 100 aa
-        sequence_ids_to_be_removed = []
-        for sequence_id in denovo_assembled_sequences: 
-            if lengthOfLongestORF(denovo_assembled_sequences[sequence_id]) < 100:
-                sequence_ids_to_be_removed.append(sequence_id)
-        
-        for sequence_id in sequence_ids_to_be_removed:
-            del denovo_assembled_sequences[sequence_id]
-            
-        for sequence_id in denovo_assembled_sequences:
-            all_sequences[f"{sequence_id}_{cultivar}_{condition}_{timepoint}_{biological_replicate}"] = denovo_assembled_sequences[sequence_id]
-            
     merged_filename = f"{options.denovo_assembly}/merged_transcripts.fasta"
     if os.path.exists(merged_filename) == False:
+        all_sequences = {}
+        for row in options.metadata:
+            samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
+            ################################################################################################################################################################################################################################################
+            # Copy assembled "transcripts" to working folder
+            ################################################################################################################################################################################################################################################
+            cmd = f"mkdir -p {options.denovo_assembly}/{samplename}_101"
+            os.system(cmd)
+            cmd = f"cp {options.temp_directory}/denovo_assembly/{samplename}_101/transcripts.fasta {options.denovo_assembly}/{samplename}_101/"
+            os.system(cmd)
+            
+            denovo_assembled_sequences = readMultiLineFastaFile(f"{options.denovo_assembly}/{samplename}_101/transcripts.fasta")
+            
+            # Remove sequences that have less than 100 aa
+            sequence_ids_to_be_removed = []
+            for sequence_id in denovo_assembled_sequences: 
+                if lengthOfLongestORF(denovo_assembled_sequences[sequence_id]) < 100:
+                    sequence_ids_to_be_removed.append(sequence_id)
+            
+            for sequence_id in sequence_ids_to_be_removed:
+                del denovo_assembled_sequences[sequence_id]
+                
+            for sequence_id in denovo_assembled_sequences:
+                all_sequences[f"{sequence_id}_{cultivar}_{condition}_{timepoint}_{biological_replicate}"] = denovo_assembled_sequences[sequence_id]
+                
+        
         fhw = open(merged_filename,"w")
         for sequence_id in all_sequences:
             fhw.write(f">{sequence_id}\n{all_sequences[sequence_id]}\n")
         fhw.close()
+    logging.info("All de novo assemblies are merged")
     
     # Generate CDHIT clusters
-    cluster_similarity = 0.8
-    cmd  = f"cd-hit-est "
-    cmd += f" -i {options.denovo_assembly}/merged_transcripts.fasta "
-    cmd += f" -o {options.denovo_assembly}/merged_transcripts_cdhit_clusters_{cluster_similarity} "
-    cmd += f" -c {cluster_similarity} "
-    cmd += f" -T {options.cpu} "
-    cmd += f" -d 0 "
-    cmd += f" -M 10000 "
-    cmd += f" 1> {options.denovo_assembly}/merged_transcripts_cdhit_clusters_{cluster_similarity}.output "
-    cmd += f" 2> {options.denovo_assembly}/merged_transcripts_cdhit_clusters_{cluster_similarity}.error "
-    
-    if os.path.exists(f"{options.denovo_assembly}/merged_transcripts_cdhit_clusters_{cluster_similarity}.clstr") == False:
-        software = "cdhit"
-        version = list_of_softwares_with_versions[software]
-        runSingularityCommand(logging, 
-                              "CDHIT", 
-                              version, 
-                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
-                              container_name = "star_alignment",
-                              volumes = volumes_list,
-                              command = cmd, 
-                              cpus = options.cpu, 
-                              memory = '100g')  
+    for cluster_similarity in [0.8, 0.85, 0.9,0.95]:
+        cmd  = f"cd-hit-est "
+        cmd += f" -i {options.denovo_assembly}/merged_transcripts.fasta "
+        cmd += f" -o {options.denovo_assembly}/merged_transcripts_cdhit_clusters_{cluster_similarity} "
+        cmd += f" -c {cluster_similarity} "
+        cmd += f" -T {options.cpu} "
+        cmd += f" -d 0 "
+        cmd += f" -M 10000 "
+        cmd += f" 1> {options.denovo_assembly}/merged_transcripts_cdhit_clusters_{cluster_similarity}.output "
+        cmd += f" 2> {options.denovo_assembly}/merged_transcripts_cdhit_clusters_{cluster_similarity}.error "
+        
+        if os.path.exists(f"{options.denovo_assembly}/merged_transcripts_cdhit_clusters_{cluster_similarity}.clstr") == False:
+            software = "cdhit"
+            version = list_of_softwares_with_versions[software]
+            runSingularityCommand(logging, 
+                                  "CDHIT", 
+                                  version, 
+                                  image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                                  container_name = "star_alignment",
+                                  volumes = volumes_list,
+                                  command = cmd, 
+                                  cpus = options.cpu, 
+                                  memory = '100g')
+            logging.info(f"CDHIT execution completed for cluster threshold {cluster_similarity}")  
+    logging.info("CDHIT execution complete")
     
     ################################################################################################################################################################################################################################################
     # Extract alignments to the fungal references
@@ -489,8 +501,6 @@ def main():
         if os.path.exists(f"{options.temp_directory}/alignments/{samplename}_Aligned.sortedByCoord.out.bam") == True and os.path.exists(f"{options.output_directory}/alignments/{samplename}_Aligned.sorted.out.bam") == False:
             cmd = f"cp {options.temp_directory}/alignments/{samplename}_Aligned.sortedByCoord.out.bam {options.output_directory}/alignments/"
             os.system(cmd)
-        
-        
         
         # Convert the bamfile to samfile
         cmd = f"samtools view -@ {options.cpu} -h {bamfilename} > {samfilename}"
@@ -533,6 +543,7 @@ def main():
                               command = cmd, 
                               cpus = options.cpu, 
                               memory = '100g')
+        logging.info(f"Fungal reads extracted from sample {samplename}")
         
         
         if options.transfer:
@@ -545,6 +556,12 @@ def main():
         
         cmd = f"rm {samfilename_only_fungal_alignments}"
         os.system(cmd)
+        
+    ################################################################################################################################################################################################################################################
+    # Generate fungal genome assembly
+    ################################################################################################################################################################################################################################################
+    
+    
     
     
 if __name__ == "__main__":
