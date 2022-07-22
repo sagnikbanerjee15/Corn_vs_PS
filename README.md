@@ -110,6 +110,10 @@ Verification was perfomed by mapping RNA-Seq data (samples 113-122) from S2 and 
 
 3. De novo assembled sequences from all 128 samples were merged together. CD-HIT (v4.8.1) was used to cluster them at a threshold of 0.8
 
-4. 
+4. Extract read alignments that map to the PS genome using samtools and custom python script.
+
+5. Generate genome guided assembly using PsiCLASS
+
+6. 
 
 
