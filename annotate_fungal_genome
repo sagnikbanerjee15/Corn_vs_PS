@@ -499,7 +499,7 @@ def main():
         bamfilename = f"{options.output_directory}/alignments/{samplename}_Aligned.sortedByCoord.out.bam"
         samfilename = f"{options.output_directory}/alignments/{samplename}_Aligned.sortedByCoord.out.sam"
         samfilename_only_fungal_alignments = f"{options.output_directory}/fungal_alignments/{samplename}_Aligned.sortedByCoord.out.sam"
-        bamfilename_only_fungal_alignments = f"{options.output_directory}/fungal_alignments/{samplename}_Aligned.sortedByCoord.out.sam"
+        bamfilename_only_fungal_alignments = f"{options.output_directory}/fungal_alignments/{samplename}_Aligned.sortedByCoord.out.bam"
         
         if os.path.exists(f"{options.temp_directory}/fungal_alignments/{samplename}_Aligned.sorted.out.sam") == True or os.path.exists(bamfilename_only_fungal_alignments) == True:
             continue
@@ -513,7 +513,7 @@ def main():
         software = "samtools"
         version = list_of_softwares_with_versions[software]
         runSingularityCommand(logging, 
-                              "STAR", 
+                              "samtools", 
                               version, 
                               image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
                               container_name = "samtools_convert_bam_to_sam", 
@@ -539,9 +539,10 @@ def main():
         
         # Convert the extracted samfile to bamfile
         cmd = f"samtools view -@ {options.cpu} -bS {samfilename_only_fungal_alignments} > {bamfilename_only_fungal_alignments}"
+        software = "samtools"
         version = list_of_softwares_with_versions[software]
         runSingularityCommand(logging, 
-                              "STAR", 
+                              "samtools", 
                               version, 
                               image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
                               container_name = "samtools_convert_sam_to_bam", 
