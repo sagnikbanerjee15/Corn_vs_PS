@@ -597,17 +597,21 @@ def main():
     cmd += f" -o {options.psiclass_assembly_replicates_separate}"
     cmd += f" -p {options.cpu}"
     cmd += f" --primaryParalog "
+    cmd += f" 1> {options.psiclass_assembly_replicates_separate}.output "
+    cmd += f" 2> {options.psiclass_assembly_replicates_separate}.error "
     software = "psiclass"
     version = list_of_softwares_with_versions[software]
-    runSingularityCommand(logging, 
-                          "psiclass_replicates_separate", 
-                          version, 
-                          image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
-                          container_name = "gg_assembly_psiclass", 
-                          volumes = volumes_list,
-                          command = cmd, 
-                          cpus = options.cpu, 
-                          memory = '100g')
+    
+    if os.path.exists(f"{options.psiclass_assembly_replicates_separate}/psiclass_output_vote.gtf") == False:
+        runSingularityCommand(logging, 
+                              "psiclass_replicates_separate", 
+                              version, 
+                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                              container_name = "gg_assembly_psiclass", 
+                              volumes = volumes_list,
+                              command = cmd, 
+                              cpus = options.cpu, 
+                              memory = '100g')
     
     # Merge replicates
     replicates_group = {}
@@ -617,8 +621,6 @@ def main():
             replicates_group[f"{cultivar}~{condition}~{timepoint}"] = []
         replicates_group[f"{cultivar}~{condition}~{timepoint}"].append(samplename)
         
-    print(replicates_group)
-    return
     fhw = open(f"{options.output_directory}/fungal_alignments/list_of_bam_files_replicates_merged","w")
     for category in replicates_group:
         merged_bamfilename = f"{options.output_directory}/fungal_alignments/{category}.bam"
@@ -649,9 +651,12 @@ def main():
     cmd += f" -o {options.psiclass_assembly_replicates_merged}"
     cmd += f" -p {options.cpu}"
     cmd += f" --primaryParalog "
+    cmd += f" 1> {options.psiclass_assembly_replicates_merged}.output "
+    cmd += f" 2> {options.psiclass_assembly_replicates_merged}.error "
     software = "psiclass"
     version = list_of_softwares_with_versions[software]
-    runSingularityCommand(logging, 
+    if os.path.exists(f"{options.psiclass_assembly_replicates_merged}/psiclass_output_vote.gtf") == False:
+        runSingularityCommand(logging, 
                           "psiclass_replicates_merged", 
                           version, 
                           image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
