@@ -221,11 +221,12 @@ def main():
     ################################################################################################################################################################################################################################################
     
     # Copy the reference index if it is not present
-    cmd = f"cp {options.temp_directory}/bowtie2_index/{options.reference.split('/')[-1]}* {options.output_directory}/bowtie2_index"
-    os.system(cmd)
+    if os.path.exists(f"{options.output_directory}/bowtie2_index") == False:
+        cmd = f"cp {options.temp_directory}/bowtie2_index/{options.reference.split('/')[-1]}* {options.output_directory}/bowtie2_index"
+        os.system(cmd)
     
     
-    for row in options.metadata:
+    for row in options.metadata[::-1]:
         
         samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
         
