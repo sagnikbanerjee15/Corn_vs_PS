@@ -352,7 +352,8 @@ def main():
                 
                 cmd = f"rm {options.output_directory}/alignments/{samplename}*gz"
                 os.system(cmd)
-                
+        else:
+            logging.info(f"STAR mapping has been generated for sample {samplename}")
     logging.info("All STAR alignments are completed")
     
     # de novo align the unmapped reads
@@ -374,35 +375,37 @@ def main():
                 cmd = f"mv {options.output_directory}/alignments/{samplename}_Unmapped.out.mate2 {options.output_directory}/alignments/{samplename}_Unmapped.out.mate2.fq"
                 os.system(cmd)
             
-        cmd  = f"spades.py "
-        cmd += f" --rna "
-        if ended == "SE":
-            cmd += f" -s {options.output_directory}/alignments/{samplename}_Unmapped.out.mate.fq "
+            cmd  = f"spades.py "
+            cmd += f" --rna "
+            if ended == "SE":
+                cmd += f" -s {options.output_directory}/alignments/{samplename}_Unmapped.out.mate.fq "
+            else:
+                cmd += f" -1 {options.output_directory}/alignments/{samplename}_Unmapped.out.mate1.fq "
+                cmd += f" -2 {options.output_directory}/alignments/{samplename}_Unmapped.out.mate2.fq "
+            cmd += f" --threads {options.cpu}"
+            cmd += f" -k 101 "
+            cmd += f" -o {options.denovo_assembly}/{samplename}_101 "
+            cmd += f" 1> {options.denovo_assembly}/{samplename}_101.output "
+            cmd += f" 2> {options.denovo_assembly}/{samplename}_101.error "
+            logging.info(f"De novo assembly generation completed for {samplename}")
+            
+            if os.path.exists(f"{options.denovo_assembly}/{samplename}_101/transcripts.fasta") == False and os.path.exists(f"{options.temp_directory}/denovo_assembly/{samplename}_101/transcripts.fasta") == False:
+                software = "spades"
+                version = list_of_softwares_with_versions[software]
+                runSingularityCommand(logging, 
+                                          "spades", 
+                                          version, 
+                                          image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                                          container_name = "spades_assembly",
+                                          volumes = volumes_list,
+                                          command = cmd, 
+                                          cpus = options.cpu, 
+                                          memory = '300g')
+            
+            cmd = f"rm {options.output_directory}/alignments/{samplename}_Unmapped* "
+            os.system(cmd)
         else:
-            cmd += f" -1 {options.output_directory}/alignments/{samplename}_Unmapped.out.mate1.fq "
-            cmd += f" -2 {options.output_directory}/alignments/{samplename}_Unmapped.out.mate2.fq "
-        cmd += f" --threads {options.cpu}"
-        cmd += f" -k 101 "
-        cmd += f" -o {options.denovo_assembly}/{samplename}_101 "
-        cmd += f" 1> {options.denovo_assembly}/{samplename}_101.output "
-        cmd += f" 2> {options.denovo_assembly}/{samplename}_101.error "
-        logging.info(f"De novo assembly generation completed for {samplename}")
-        
-        if os.path.exists(f"{options.denovo_assembly}/{samplename}_101/transcripts.fasta") == False and os.path.exists(f"{options.temp_directory}/denovo_assembly/{samplename}_101/transcripts.fasta") == False:
-            software = "spades"
-            version = list_of_softwares_with_versions[software]
-            runSingularityCommand(logging, 
-                                      "spades", 
-                                      version, 
-                                      image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
-                                      container_name = "spades_assembly",
-                                      volumes = volumes_list,
-                                      command = cmd, 
-                                      cpus = options.cpu, 
-                                      memory = '300g')
-        
-        cmd = f"rm {options.output_directory}/alignments/{samplename}_Unmapped* "
-        os.system(cmd)
+            logging.info(f"De novo assembly generated for sample {samplename}")
         
         if options.transfer:
             cmd = f"mv {options.output_directory}/denovo_assembly/{samplename}_101* {options.temp_directory}/denovo_assembly"
