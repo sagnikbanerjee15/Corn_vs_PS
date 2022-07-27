@@ -29,7 +29,6 @@ bash -c "TransMeta \
 --strand unstranded \
 --output_dir ${ROOT_DIR}/data/PS_SALSA_annotation/alignments/transmeta_assembly_output \
 --min_trans_length 100 \
--s 2 \
 -p 72 \
 1> ${ROOT_DIR}/data/PS_SALSA_annotation/alignments/transmeta_assembly_output.output \ 
 2> ${ROOT_DIR}/data/PS_SALSA_annotation/alignments/transmeta_assembly_output.error "
