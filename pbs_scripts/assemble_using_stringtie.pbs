@@ -12,8 +12,8 @@
 #SBATCH --mail-type=BEGIN
 #SBATCH --mail-type=END
 #SBATCH --mail-type=FAIL
-#SBATCH --output=/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation.output
-#SBATCH --error=/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation.error
+#SBATCH --output=/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/stringtie_all_merged.output
+#SBATCH --error=/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/stringtie_all_merged.error
 
 module load singularity
 
@@ -24,12 +24,5 @@ REF_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS/data/reference"
 singularity exec \
 -B ${ROOT_DIR}/data/PS_SALSA_annotation/alignments:${ROOT_DIR}/data/PS_SALSA_annotation/alignments \
 ${ROOT_DIR}/data/PS_SALSA_annotation/singularity_images/stringtie_2.2.1.sif \
-bash -c "stringtie \
-${ROOT_DIR}/data/PS_SALSA_annotation/alignments/all_merged.bam \
--o ${ROOT_DIR}/data/PS_SALSA_annotation/alignments/stringtie_all_merged.gtf \
--m 100 \
--s 2 \
--p 72 \
-1> ${ROOT_DIR}/data/PS_SALSA_annotation/alignments/stringtie_all_merged.output \ 
-2> ${ROOT_DIR}/data/PS_SALSA_annotation/alignments/stringtie_all_merged.error "
+bash -c "stringtie /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_merged.bam -o /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/stringtie_all_merged.gtf -m 100 -s 2 -p 72 1> /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/stringtie_all_merged.output  2> /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/stringtie_all_merged.error "
 

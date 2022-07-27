@@ -12,8 +12,8 @@
 #SBATCH --mail-type=BEGIN
 #SBATCH --mail-type=END
 #SBATCH --mail-type=FAIL
-#SBATCH --output=/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation.output
-#SBATCH --error=/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation.error
+#SBATCH --output=/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/transmeta_assembly_output.output
+#SBATCH --error=/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/transmeta_assembly_output.error
 
 module load singularity
 
@@ -24,12 +24,5 @@ REF_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS/data/reference"
 singularity exec \
 -B ${ROOT_DIR}/data/PS_SALSA_annotation/alignments:${ROOT_DIR}/data/PS_SALSA_annotation/alignments \
 ${ROOT_DIR}/data/PS_SALSA_annotation/singularity_images/transmeta_0.0.1.sif \
-bash -c "TransMeta \
---bam ${ROOT_DIR}/data/PS_SALSA_annotation/alignments/list_of_bam_files \
---strand unstranded \
---output_dir ${ROOT_DIR}/data/PS_SALSA_annotation/alignments/transmeta_assembly_output \
---min_trans_length 100 \
--p 72 \
-1> ${ROOT_DIR}/data/PS_SALSA_annotation/alignments/transmeta_assembly_output.output \ 
-2> ${ROOT_DIR}/data/PS_SALSA_annotation/alignments/transmeta_assembly_output.error "
+bash -c "TransMeta --bam /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/list_of_bam_files --strand unstranded --output_dir ${ROOT_DIR}/data/PS_SALSA_annotation/alignments/transmeta_assembly_output --min_trans_length 100 -p 72 1> /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/transmeta_assembly_output.output 2> /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/transmeta_assembly_output.error "
 
