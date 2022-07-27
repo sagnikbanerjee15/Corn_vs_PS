@@ -23,7 +23,7 @@ REF_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS/data/reference"
 
 singularity exec \
 -B ${ROOT_DIR}/data/PS_SALSA_annotation/alignments:${ROOT_DIR}/data/PS_SALSA_annotation/alignments \
-${ROOT_DIR}/singularity_images/stringtie_2.2.1.sif \
+${ROOT_DIR}/data/PS_SALSA_annotation/singularity_images/stringtie_2.2.1.sif \
 bash -c "stringtie \
 ${ROOT_DIR}/data/PS_SALSA_annotation/alignments/all_merged.bam \
 -o ${ROOT_DIR}/data/PS_SALSA_annotation/alignments/stringtie_all_merged.gtf \

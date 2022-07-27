@@ -23,7 +23,7 @@ REF_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS/data/reference"
 
 singularity exec \
 -B ${ROOT_DIR}/data/PS_SALSA_annotation/alignments:${ROOT_DIR}/data/PS_SALSA_annotation/alignments \
-${ROOT_DIR}/singularity_images/transmeta_0.0.1.sif \
+${ROOT_DIR}/data/PS_SALSA_annotation/singularity_images/transmeta_0.0.1.sif \
 bash -c "TransMeta \
 --bam ${ROOT_DIR}/data/PS_SALSA_annotation/alignments/list_of_bam_files \
 --strand unstranded \
