@@ -1,0 +1,38 @@
+#!/bin/bash
+
+#SBATCH -n 40
+#SBATCH -N 1
+#SBATCH --partition=long
+##SBATCH --partition=priority-mem768
+#SBATCH --qos=maizegdb
+#SBATCH --mem=300G
+#SBATCH --time=7-00:00:00
+#SBATCH --job-name="denovo_assemble"
+#SBATCH --mail-user=sagnikbanerjee15@gmail.com
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
+#SBATCH --output=/project/maizegdb/sagnik/CORN_VS_PS/data/denovo_assemble.output
+#SBATCH --error=/project/maizegdb/sagnik/CORN_VS_PS/data/denovo_assemble.error
+
+module load singularity
+
+ROOT_DIR="/project/maizegdb/sagnik/CORN_VS_PS"
+TEMP_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS"
+REF_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS/data/reference"
+
+cp /90daydata/maizegdb/sagnik/CORN_VS_PS/PS_SALSA_annotation/alignments/all_Unmapped.out.mate1 /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/ 
+cp /90daydata/maizegdb/sagnik/CORN_VS_PS/PS_SALSA_annotation/alignments/all_Unmapped.out.mate2 /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/
+
+singularity exec -B /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments:/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments \
+-B /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/denovo_assembly:/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/denovo_assembly \
+bash -c \
+"spades.py \
+--rna \
+-1 /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped.out.mate1 \
+-2 /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped.out.mate2 \
+--threads 40 \
+-k 101 \
+-o /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/denovo_assembly/all_unmapped_merged \
+1> /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/denovo_assembly/all_unmapped_merged.output \
+2> /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/denovo_assembly/all_unmapped_merged.error"

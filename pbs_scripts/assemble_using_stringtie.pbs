@@ -5,7 +5,7 @@
 #SBATCH --partition=long
 ##SBATCH --partition=priority-mem768
 #SBATCH --qos=maizegdb
-#SBATCH --mem=300G
+#SBATCH --mem=500G
 #SBATCH --time=14-00:00:00
 #SBATCH --job-name="Stringtie"
 #SBATCH --mail-user=sagnikbanerjee15@gmail.com
