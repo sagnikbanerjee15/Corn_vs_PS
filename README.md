@@ -108,13 +108,13 @@ Verification was perfomed by mapping RNA-Seq data (samples 113-122) from S2 and 
 
 1a. Merge unmapped reads from all 128 samples. 
 
-2. Unmapped reads were assembled denovo using spades (v3.15.4) with kmer length set to 101. No other de novo assemblers were explored to reduce complexity. [Side note - ]
+2. Unmapped reads were assembled denovo using spades (v3.15.4) with kmer length set to 101. No other de novo assemblers were explored to reduce complexity.
 
-3. De novo assembled sequences from all 128 samples were merged together. CD-HIT (v4.8.1) was used to cluster them at a threshold of 0.8. Rerun CHIT again only on the representative clusters but now with local alignment. Also look at coverage.
+3. [Previous approach] De novo assembled sequences from all 128 samples were merged together. De novo assembly from each sample generated about 25K transcripts. CD-HIT (v4.8.1) was used to cluster them at a threshold of 0.8. Rerun CHIT again only on the representative clusters but now with local alignment. Also look at coverage.
 
 4. Extract read alignments that map to the PS genome using samtools and custom python script.
 
-5. Generate genome guided assembly using PsiCLASS
+5. Generate genome guided assembly using PsiCLASS and also with Stringtie2
 
 6. 
 

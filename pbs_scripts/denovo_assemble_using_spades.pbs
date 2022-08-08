@@ -5,7 +5,7 @@
 #SBATCH --partition=long
 ##SBATCH --partition=priority-mem768
 #SBATCH --qos=maizegdb
-#SBATCH --mem=300G
+#SBATCH --mem=500G
 #SBATCH --time=7-00:00:00
 #SBATCH --job-name="denovo_assemble"
 #SBATCH --mail-user=sagnikbanerjee15@gmail.com
@@ -33,6 +33,7 @@ bash -c \
 -1 /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped.out.mate1.fq \
 -2 /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped.out.mate2.fq \
 --threads 40 \
+--memory 500 \
 -k 101 \
 -o /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/denovo_assembly/all_unmapped_merged \
 1> /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/denovo_assembly/all_unmapped_merged.output \
