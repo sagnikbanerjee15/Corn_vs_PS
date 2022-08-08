@@ -21,8 +21,8 @@ ROOT_DIR="/project/maizegdb/sagnik/CORN_VS_PS"
 TEMP_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS"
 REF_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS/data/reference"
 
-#cp /90daydata/maizegdb/sagnik/CORN_VS_PS/PS_SALSA_annotation/alignments/all_Unmapped.out.mate1 /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/ 
-#cp /90daydata/maizegdb/sagnik/CORN_VS_PS/PS_SALSA_annotation/alignments/all_Unmapped.out.mate2 /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/
+#cp /90daydata/maizegdb/sagnik/CORN_VS_PS/PS_SALSA_annotation/alignments/all_Unmapped.out.mate1 /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped.out.mate1.fq 
+#cp /90daydata/maizegdb/sagnik/CORN_VS_PS/PS_SALSA_annotation/alignments/all_Unmapped.out.mate2 /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped.out.mate2.fq
 
 singularity exec -B /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments:/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments \
 -B /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/denovo_assembly:/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/denovo_assembly \
@@ -30,8 +30,8 @@ singularity exec -B /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation
 bash -c \
 "spades.py \
 --rna \
--1 /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped.out.mate1 \
--2 /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped.out.mate2 \
+-1 /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped.out.mate1.fq \
+-2 /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped.out.mate2.fq \
 --threads 40 \
 -k 101 \
 -o /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/denovo_assembly/all_unmapped_merged \
