@@ -369,10 +369,12 @@ def main():
                 cmd = f"cp {location}/{samplename}.fastq.gz {options.main_directory_raw_reads}"
                 os.system(cmd)
             else:
-                cmd = f"cp {location}/{samplename}_1.fastq.gz {options.main_directory_raw_reads}"
-                os.system(cmd)
-                cmd = f"cp {location}/{samplename}_2.fastq.gz {options.main_directory_raw_reads}"
-                os.system(cmd)
+                if os.path.exists(f"{options.main_directory_raw_reads}/{samplename}_1.fastq.gz") == False:
+                    cmd = f"cp {location}/{samplename}_1.fastq.gz {options.main_directory_raw_reads}"
+                    os.system(cmd)
+                if os.path.exists(f"{options.main_directory_raw_reads}/{samplename}_2.fastq.gz") == False:
+                    cmd = f"cp {location}/{samplename}_2.fastq.gz {options.main_directory_raw_reads}"
+                    os.system(cmd)
             logging.info(f"Raw files copied to main directory for {samplename}")
         
             cmd  = f"trimmomatic "
