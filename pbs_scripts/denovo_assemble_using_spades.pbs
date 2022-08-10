@@ -2,10 +2,10 @@
 
 #SBATCH -n 40
 #SBATCH -N 1
-#SBATCH --partition=mem
+#SBATCH --partition=long
 ##SBATCH --partition=priority-mem768
 #SBATCH --qos=maizegdb
-#SBATCH --mem=1500G
+#SBATCH --mem=300G
 #SBATCH --time=7-00:00:00
 #SBATCH --job-name="denovo_assemble"
 #SBATCH --mail-user=sagnikbanerjee15@gmail.com
