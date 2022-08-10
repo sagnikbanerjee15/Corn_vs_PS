@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH -n 20
+#SBATCH -n 40
 #SBATCH -N 1
 #SBATCH --partition=mem
 ##SBATCH --partition=priority-mem768
@@ -25,16 +25,31 @@ REF_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS/data/reference"
 #cp /90daydata/maizegdb/sagnik/CORN_VS_PS/PS_SALSA_annotation/alignments/all_Unmapped.out.mate2 /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped.out.mate2.fq
 
 singularity exec -B /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments:/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments \
--B /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/denovo_assembly:/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/denovo_assembly \
-/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/singularity_images/spades:3.15.4 \
+/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/singularity_images/trimmomatic:3.9 \
 bash -c \
-"spades.py \
---rna \
--1 /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped.out.mate1.fq \
--2 /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped.out.mate2.fq \
---threads 20 \
---memory 1500 \
--k 101 \
--o /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/denovo_assembly/all_unmapped_merged \
-1> /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/denovo_assembly/all_unmapped_merged.output \
-2> /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/denovo_assembly/all_unmapped_merged.error"
+"trimmomatic \
+PE \
+-threads 40 \
+/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped.out.mate1.fq \
+/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped.out.mate2.fq \
+/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped.out.mate1_trimmed.fq \
+/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped.out.mate1_unpaired.fq \
+/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped.out.mate2_trimmed.fq \
+/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped.out.mate2_unpaired.fq \
+1> /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped_trimmomatic.output \
+2> /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped_trimmomatic.error "
+
+##singularity exec -B /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments:/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments \
+##-B /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/denovo_assembly:/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/denovo_assembly \
+##/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/singularity_images/spades:3.15.4 \
+##bash -c \
+##"spades.py \
+##--rna \
+##-1 /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped.out.mate1.fq \
+##-2 /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped.out.mate2.fq \
+##--threads 20 \
+##--memory 1500 \
+##-k 101 \
+##-o /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/denovo_assembly/all_unmapped_merged \
+##1> /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/denovo_assembly/all_unmapped_merged.output \
+##2> /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/denovo_assembly/all_unmapped_merged.error"
