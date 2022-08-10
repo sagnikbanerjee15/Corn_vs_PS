@@ -34,11 +34,12 @@ def parseCommandLineArguments():
     # Optional arguments
     ##################################################################################################
     optional_named.add_argument( "--cpu", "-cpu", help = "Enter the number of CPUs. Please note that all alignments will be conducted using a single CPU. This argument will control how many parallel alignments can be launched", default = 1 )
+    optional_named.add_argument( "--memory", "-memory", help = "Maxmimum memory limit", defualt = '100')
     optional_named.add_argument( "--temp_directory", "-temp_dir", help = "Enter a temporary directory. All files will be dumped in this directory to prevent the output directory to get crowded. Outputs and Error files will not be moved", default = None )
     optional_named.add_argument( "--transfer", "--transfer", help = "Keep moving intermediate files and folders from the output directory to the temp directory to reduce space consumption. Developed for Ceres architecture", action = "store_true")
     optional_named.add_argument( "--framework", "-fm", help = "Enter your choice of framework", choices = ["docker", "singularity"], default = "docker" )
     optional_named.add_argument( "--logfilename", "-logfilename", help = "Enter the name of the logfile" )
-
+    
     ##################################################################################################
     # Suppressed arguments
     ##################################################################################################
@@ -322,7 +323,7 @@ def main():
                               volumes = volumes_list,
                               command = cmd, 
                               cpus = options.cpu, 
-                              memory = '100g')
+                              memory = f'{options.memory}g')
         logging.info("STAR index generation completed")
         
         # Move the star index to the temp directory if a transfer is requested
@@ -342,6 +343,15 @@ def main():
         cmd = f"cp -r {options.temp_directory_star_index} {options.main_directory_star_index}/.."
         os.system(cmd)
     ################################################################################################################################################################################################################################################
+    
+    # Read in the sequence ids in the fungal reference
+    fungal_references = []
+    fhr = open(options.ps_reference, "r")
+    for line in fhr:
+        if line[0] == ">":
+            fungal_references.append(line.strip()[1:])
+    fhr.close()
+    fungal_references = set(fungal_references)
     
     ################################################################################################################################################################################################################################################
     # Trim reads and align to combined reference
@@ -387,7 +397,7 @@ def main():
                                   volumes = volumes_list,
                                   command = cmd, 
                                   cpus = options.cpu, 
-                                  memory = '100g')
+                                  memory = f'{options.memory}g')
             logging.info(f"Adpater removal with Trimmomatic completed for {samplename}")
             
             if options.transfer:
@@ -440,8 +450,68 @@ def main():
                                   volumes = volumes_list,
                                   command = cmd, 
                                   cpus = options.cpu, 
-                                  memory = '100g')
+                                  memory = f'{options.memory}g')
             logging.info(f"STAR alignment completed for sample no {samplename}")
+            
+            ################################################################################################################################################################################################################################################
+            # Extract alignments to the fungal references
+            ################################################################################################################################################################################################################################################ 
+            
+            bamfilename = f"{options.main_directory_alignments_to_combined_reference}/{samplename}_Aligned.sortedByCoord.out.bam"
+            samfilename = f"{options.main_directory_alignments_to_combined_reference}/{samplename}_Aligned.sortedByCoord.out.sam"
+            samfilename_only_fungal_alignments = f"{options.main_directory_alignments_to_fungal_reference}/{samplename}_Aligned.sortedByCoord.out.sam"
+            bamfilename_only_fungal_alignments = f"{options.main_directory_alignments_to_fungal_reference}/{samplename}_Aligned.sortedByCoord.out.bam"
+            
+            if os.path.exists(f"{options.temp_directory_alignments_to_fungal_reference}/{samplename}_Aligned.sortedByCoord.out.bam") == False and os.path.exists(bamfilename_only_fungal_alignments) == False:
+        
+                if os.path.exists(f"{options.temp_directory_alignments_to_combined_reference}/{samplename}_Aligned.sortedByCoord.out.bam") == True and os.path.exists(f"{options.main_directory_alignments_to_combined_reference}/{samplename}_Aligned.sortedByCoord.out.bam") == False:
+                    cmd = f"cp {options.temp_directory_alignments_to_combined_reference}/{samplename}_Aligned.sortedByCoord.out.bam {options.main_directory_alignments_to_combined_reference}/"
+                    os.system(cmd)
+                
+                # Convert the bamfile to samfile
+                cmd = f"samtools view -@ {options.cpu} -h {bamfilename} > {samfilename}"
+                software = "samtools"
+                version = list_of_softwares_with_versions[software]
+                runSingularityCommand(logging, 
+                                      "samtools", 
+                                      version, 
+                                      image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                                      container_name = "samtools_convert_bam_to_sam", 
+                                      volumes = volumes_list,
+                                      command = cmd, 
+                                      cpus = options.cpu, 
+                                      memory = f'{options.memory}g')
+                
+                # Extract the alignments to the fungal reference
+                fhr = open(samfilename, "r")
+                fhw = open(samfilename_only_fungal_alignments, "w")
+                for line in fhr:
+                    if line[0] == "@":
+                        if "@HD" in line:
+                            fhw.write(line)
+                        elif line.strip().split("SN:")[-1].split()[0] in fungal_references:
+                            fhw.write(line)
+                    else:
+                        if line.strip().split()[2] in fungal_references:
+                            fhw.write(line)
+                fhw.close()
+                fhr.close()
+                
+                # Convert the extracted samfile to bamfile
+                cmd = f"samtools view -@ {options.cpu} -bS {samfilename_only_fungal_alignments} > {bamfilename_only_fungal_alignments}"
+                software = "samtools"
+                version = list_of_softwares_with_versions[software]
+                runSingularityCommand(logging, 
+                                      "samtools", 
+                                      version, 
+                                      image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                                      container_name = "samtools_convert_sam_to_bam", 
+                                      volumes = volumes_list,
+                                      command = cmd, 
+                                      cpus = options.cpu, 
+                                      memory = f'{options.memory}g')
+                logging.info(f"Fungal reads extracted from sample {samplename}")
+            
             if options.transfer:
                 cmd = f"mv {options.main_directory_alignments_to_combined_reference}/{samplename}*.bam {options.temp_directory_alignments_to_combined_reference}"
                 os.system(cmd)
@@ -449,10 +519,19 @@ def main():
                 cmd = f"mv {options.main_directory_alignments_to_combined_reference}/{samplename}*.out {options.temp_directory_alignments_to_combined_reference}"
                 os.system(cmd)
                 
+                cmd = f"mv {bamfilename_only_fungal_alignments} {options.temp_directory_alignments_to_fungal_reference}"
+                os.system(cmd)
+                
                 cmd = f"rm {options.main_directory_trimmed_reads}/{samplename}*gz"
                 os.system(cmd)
                 
                 cmd = f"rm {options.main_directory_raw_reads}/{samplename}*gz"
+                os.system(cmd)
+                
+                cmd = f"rm {options.main_directory_alignments_to_combined_reference}/{samplename}_Aligned.sortedByCoord.out.*am"
+                os.system(cmd)
+                
+                cmd = f"rm {samfilename_only_fungal_alignments}"
                 os.system(cmd)
         else:
             logging.info(f"STAR mapping has been generated for sample {samplename}")
@@ -487,88 +566,18 @@ def main():
     ################################################################################################################################################################################################################################################
 
 
-    ################################################################################################################################################################################################################################################
-    # Extract alignments to the fungal references
-    ################################################################################################################################################################################################################################################ 
-    # Read in the sequence ids in the fungal reference
-    fungal_references = []
-    fhr = open(options.ps_reference, "r")
-    for line in fhr:
-        if line[0] == ">":
-            fungal_references.append(line.strip()[1:])
-    fhr.close()
-    fungal_references = set(fungal_references)
+    
+    
+    
+    
+    
+    
+    
     
     for row in options.metadata:
         samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
         
-        bamfilename = f"{options.main_directory_alignments_to_combined_reference}/{samplename}_Aligned.sortedByCoord.out.bam"
-        samfilename = f"{options.main_directory_alignments_to_combined_reference}/{samplename}_Aligned.sortedByCoord.out.sam"
-        samfilename_only_fungal_alignments = f"{options.main_directory_alignments_to_fungal_reference}/{samplename}_Aligned.sortedByCoord.out.sam"
-        bamfilename_only_fungal_alignments = f"{options.main_directory_alignments_to_fungal_reference}/{samplename}_Aligned.sortedByCoord.out.bam"
         
-        if os.path.exists(f"{options.temp_directory_alignments_to_fungal_reference}/{samplename}_Aligned.sortedByCoord.out.bam") == True or os.path.exists(bamfilename_only_fungal_alignments) == True:
-            continue
-        
-        if os.path.exists(f"{options.temp_directory_alignments_to_combined_reference}/{samplename}_Aligned.sortedByCoord.out.bam") == True and os.path.exists(f"{options.main_directory_alignments_to_combined_reference}/{samplename}_Aligned.sortedByCoord.out.bam") == False:
-            cmd = f"cp {options.temp_directory_alignments_to_combined_reference}/{samplename}_Aligned.sortedByCoord.out.bam {options.main_directory_alignments_to_combined_reference}/"
-            os.system(cmd)
-        
-        # Convert the bamfile to samfile
-        cmd = f"samtools view -@ {options.cpu} -h {bamfilename} > {samfilename}"
-        software = "samtools"
-        version = list_of_softwares_with_versions[software]
-        runSingularityCommand(logging, 
-                              "samtools", 
-                              version, 
-                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
-                              container_name = "samtools_convert_bam_to_sam", 
-                              volumes = volumes_list,
-                              command = cmd, 
-                              cpus = options.cpu, 
-                              memory = '200g')
-        
-        # Extract the alignments to the fungal reference
-        fhr = open(samfilename, "r")
-        fhw = open(samfilename_only_fungal_alignments, "w")
-        for line in fhr:
-            if line[0] == "@":
-                if "@HD" in line:
-                    fhw.write(line)
-                elif line.strip().split("SN:")[-1].split()[0] in fungal_references:
-                    fhw.write(line)
-            else:
-                if line.strip().split()[2] in fungal_references:
-                    fhw.write(line)
-        fhw.close()
-        fhr.close()
-        
-        # Convert the extracted samfile to bamfile
-        cmd = f"samtools view -@ {options.cpu} -bS {samfilename_only_fungal_alignments} > {bamfilename_only_fungal_alignments}"
-        software = "samtools"
-        version = list_of_softwares_with_versions[software]
-        runSingularityCommand(logging, 
-                              "samtools", 
-                              version, 
-                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
-                              container_name = "samtools_convert_sam_to_bam", 
-                              volumes = volumes_list,
-                              command = cmd, 
-                              cpus = options.cpu, 
-                              memory = '200g')
-        logging.info(f"Fungal reads extracted from sample {samplename}")
-        
-        
-        if options.transfer:
-            cmd = f"mv {bamfilename_only_fungal_alignments} {options.temp_directory_alignments_to_fungal_reference}"
-            os.system(cmd)
-        
-        # Remove intermediate files
-        cmd = f"rm {options.main_directory_alignments_to_combined_reference}/{samplename}_Aligned.sortedByCoord.out.*am"
-        os.system(cmd)
-        
-        cmd = f"rm {samfilename_only_fungal_alignments}"
-        os.system(cmd)
         
     ################################################################################################################################################################################################################################################
     # Generate fungal genome assembly
@@ -609,7 +618,7 @@ def main():
                               volumes = volumes_list,
                               command = cmd, 
                               cpus = options.cpu, 
-                              memory = '200g')
+                              memory = f'{options.memory}g')
     
     # Merge replicates
     replicates_group = {}
@@ -640,7 +649,7 @@ def main():
                               volumes = volumes_list,
                               command = cmd, 
                               cpus = options.cpu, 
-                              memory = '200g')
+                              memory = f'{options.memory}g')
     fhw.close()
     
     # Replicates merged
@@ -663,7 +672,7 @@ def main():
                           volumes = volumes_list,
                           command = cmd, 
                           cpus = options.cpu, 
-                          memory = '200g')
+                          memory = f'{options.memory}g')
     
     return 
     
@@ -795,7 +804,7 @@ def main():
                                   volumes = volumes_list,
                                   command = cmd, 
                                   cpus = options.cpu, 
-                                  memory = '100g')
+                                  memory = f'{options.memory}g')
             logging.info(f"CDHIT execution completed for cluster threshold {cluster_similarity}")  
     logging.info("CDHIT execution complete")
     
