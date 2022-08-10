@@ -185,7 +185,8 @@ def main():
                                        "spades":"3.15.4",
                                        "cdhit":"4.8.1",
                                        "psiclass":"1.0.3",
-                                       "stringtie":"2.2.1"}
+                                       "stringtie":"2.2.1",
+                                       "ncbi_blast":"2.13.0"}
 
     volumes_list = [f"{options.output_directory}:{options.output_directory}",
                     f"{options.temp_directory}:{options.temp_directory}",
@@ -253,18 +254,23 @@ def main():
     os.system(f"mkdir -p {options.main_directory_trimmed_reads}")
     os.system(f"mkdir -p {options.temp_directory_trimmed_reads}")
     
-    options.main_directory_alignments = f"{options.output_directory}/alignments"
-    options.temp_directory_alignments = f"{options.temp_directory}/alignments"
-    os.system(f"mkdir -p {options.main_directory_alignments}")
-    os.system(f"mkdir -p {options.temp_directory_alignments}")
+    options.main_directory_alignments_to_combined_reference = f"{options.output_directory}/alignments"
+    options.temp_directory_alignments_to_combined_reference = f"{options.temp_directory}/alignments"
+    os.system(f"mkdir -p {options.main_directory_alignments_to_combined_reference}")
+    os.system(f"mkdir -p {options.temp_directory_alignments_to_combined_reference}")
+    
+    options.main_directory_alignments_to_fungal_reference = f"{options.output_directory}/alignments_fungal_reference"
+    options.temp_directory_alignments_to_fungal_reference = f"{options.temp_directory}/alignments_fungal_reference"
+    os.system(f"mkdir -p {options.main_directory_alignments_to_fungal_reference}")
+    os.system(f"mkdir -p {options.temp_directory_alignments_to_fungal_reference}")
     
     options.main_directory_spades_denovo_assembly = f"{options.output_directory}/spades_denovo_assembly"
     options.temp_directory_denovo_assembly = f"{options.temp_directory}/spades_denovo_assembly"
     os.system(f"mkdir -p {options.main_directory_spades_denovo_assembly}")
     os.system(f"mkdir -p {options.temp_directory_denovo_assembly}")
     
-    options.main_directory_fungal_alignments = f"{options.output_directory}/main_directory_fungal_alignments"
-    options.temp_directory_fungal_alignments = f"{options.temp_directory}/temp_directory_fungal_alignments"
+    options.main_directory_fungal_alignments = f"{options.output_directory}/fungal_alignments"
+    options.temp_directory_fungal_alignments = f"{options.temp_directory}/fungal_alignments"
     os.system(f"mkdir -p {options.main_directory_fungal_alignments}")
     os.system(f"mkdir -p {options.temp_directory_fungal_alignments}")
     
@@ -365,7 +371,7 @@ def main():
             cmd += f" -summary {options.main_directory_outputs_and_errors}/{samplename}_trimmomatic.summary "
             cmd += f" {options.main_directory_raw_reads}/{samplename}_1.fastq.gz {options.main_directory_raw_reads}/{samplename}_2.fastq.gz " 
             cmd += f" {options.main_directory_trimmed_reads}/{samplename}_1.fastq.gz {options.main_directory_trimmed_reads}/{samplename}_1_unpaired.fastq.gz "
-            cmd += f" {options.main_directory_trimmed_reads}main_directory_trimmed_reads/{samplename}_2.fastq.gz {options.main_directory_trimmed_reads}/{samplename}_2_unpaired.fastq.gz "
+            cmd += f" {options.main_directory_trimmed_reads}/{samplename}_2.fastq.gz {options.main_directory_trimmed_reads}/{samplename}_2_unpaired.fastq.gz "
             cmd += f" ILLUMINACLIP:/opt/conda/share/trimmomatic-0.39-2/adapters/TruSeq3-PE.fa:2:30:10 "
             cmd += f" MINLEN:100 "
             cmd += f" 1> {options.main_directory_outputs_and_errors}/{samplename}_trimmomatic_adapter_removal.output"
@@ -418,7 +424,7 @@ def main():
             cmd += f" --outFilterMatchNminOverLread 0.7 "
             cmd += f" --outSAMattributes NH HI AS nM NM MD jM jI XS "
             cmd += f" --outReadsUnmapped Fastx "
-            cmd += f" --outFileNamePrefix {options.main_directory_alignments}/{samplename}_"
+            cmd += f" --outFileNamePrefix {options.main_directory_alignments_to_combined_reference}/{samplename}_"
             cmd += f" --readFilesCommand zcat "
             cmd += f" --readFilesIn {options.main_directory_trimmed_reads}/{samplename}_1.fastq.gz {options.main_directory_trimmed_reads}/{samplename}_2.fastq.gz "
             cmd += f" 1> {options.main_directory_outputs_and_errors}/{samplename}_STAR_alignment_to_combined_reference.output "
@@ -437,10 +443,10 @@ def main():
                                   memory = '100g')
             logging.info(f"STAR alignment completed for sample no {samplename}")
             if options.transfer:
-                cmd = f"mv {options.main_directory_alignments}/{samplename}*.bam {options.temp_directory_alignments}"
+                cmd = f"mv {options.main_directory_alignments_to_combined_reference}/{samplename}*.bam {options.temp_directory_alignments_to_combined_reference}"
                 os.system(cmd)
                 
-                cmd = f"mv {options.main_directory_alignments}/{samplename}*.out {options.temp_directory_alignments}"
+                cmd = f"mv {options.main_directory_alignments_to_combined_reference}/{samplename}*.out {options.temp_directory_alignments_to_combined_reference}"
                 os.system(cmd)
                 
                 cmd = f"rm {options.main_directory_trimmed_reads}/{samplename}*gz"
@@ -456,15 +462,15 @@ def main():
     ################################################################################################################################################################################################################################################
     
     ################################################################################################################################################################################################################################################
-    # Combined all unmapped reads
+    # Combine all unmapped reads
     ################################################################################################################################################################################################################################################
     if os.path.exists(f"{options.main_directory_spades_denovo_assembly}/all_unmapped_reads_1.fastq") == False or os.path.exists(f"{options.main_directory_spades_denovo_assembly}/all_unmapped_reads_2.fastq") == False or os.path.exists(f"{options.temp_directory_spades_denovo_assembly}/all_unmapped_reads_1.fastq") == False or os.path.exists(f"{options.temp_directory_spades_denovo_assembly}/all_unmapped_reads_2.fastq") == False: 
         cmd_1 = f"cat "
         cmd_2 = f"cat "
         for row in options.metadata:
             samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
-            cmd_1 += f" {options.temp_directory_alignments}/{samplename}_Unmapped.out.mate1|gzip -c  "
-            cmd_2 += f" {options.temp_directory_alignments}/{samplename}_Unmapped.out.mate2|gzip -c "
+            cmd_1 += f" {options.temp_directory_alignments_to_combined_reference}/{samplename}_Unmapped.out.mate1|gzip -c  "
+            cmd_2 += f" {options.temp_directory_alignments_to_combined_reference}/{samplename}_Unmapped.out.mate2|gzip -c "
         cmd_1 += f" > {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_1.fastq.gz "
         cmd_2 += f" > {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_2.fastq.gz "
         os.system(cmd_1)
@@ -479,11 +485,217 @@ def main():
             cmd = f"rm {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_*.fastq.gz "
             os.system(cmd)
     ################################################################################################################################################################################################################################################
-    return
 
 
+    ################################################################################################################################################################################################################################################
+    # Extract alignments to the fungal references
+    ################################################################################################################################################################################################################################################ 
+    # Read in the sequence ids in the fungal reference
+    fungal_references = []
+    fhr = open(options.ps_reference, "r")
+    for line in fhr:
+        if line[0] == ">":
+            fungal_references.append(line.strip()[1:])
+    fhr.close()
+    fungal_references = set(fungal_references)
+    
+    for row in options.metadata:
+        samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
+        
+        bamfilename = f"{options.main_directory_alignments_to_combined_reference}/{samplename}_Aligned.sortedByCoord.out.bam"
+        samfilename = f"{options.main_directory_alignments_to_combined_reference}/{samplename}_Aligned.sortedByCoord.out.sam"
+        samfilename_only_fungal_alignments = f"{options.main_directory_alignments_to_fungal_reference}/{samplename}_Aligned.sortedByCoord.out.sam"
+        bamfilename_only_fungal_alignments = f"{options.main_directory_alignments_to_fungal_reference}/{samplename}_Aligned.sortedByCoord.out.bam"
+        
+        if os.path.exists(f"{options.temp_directory_alignments_to_fungal_reference}/{samplename}_Aligned.sortedByCoord.out.bam") == True or os.path.exists(bamfilename_only_fungal_alignments) == True:
+            continue
+        
+        if os.path.exists(f"{options.temp_directory_alignments_to_combined_reference}/{samplename}_Aligned.sortedByCoord.out.bam") == True and os.path.exists(f"{options.main_directory_alignments_to_combined_reference}/{samplename}_Aligned.sortedByCoord.out.bam") == False:
+            cmd = f"cp {options.temp_directory_alignments_to_combined_reference}/{samplename}_Aligned.sortedByCoord.out.bam {options.main_directory_alignments_to_combined_reference}/"
+            os.system(cmd)
+        
+        # Convert the bamfile to samfile
+        cmd = f"samtools view -@ {options.cpu} -h {bamfilename} > {samfilename}"
+        software = "samtools"
+        version = list_of_softwares_with_versions[software]
+        runSingularityCommand(logging, 
+                              "samtools", 
+                              version, 
+                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                              container_name = "samtools_convert_bam_to_sam", 
+                              volumes = volumes_list,
+                              command = cmd, 
+                              cpus = options.cpu, 
+                              memory = '200g')
+        
+        # Extract the alignments to the fungal reference
+        fhr = open(samfilename, "r")
+        fhw = open(samfilename_only_fungal_alignments, "w")
+        for line in fhr:
+            if line[0] == "@":
+                if "@HD" in line:
+                    fhw.write(line)
+                elif line.strip().split("SN:")[-1].split()[0] in fungal_references:
+                    fhw.write(line)
+            else:
+                if line.strip().split()[2] in fungal_references:
+                    fhw.write(line)
+        fhw.close()
+        fhr.close()
+        
+        # Convert the extracted samfile to bamfile
+        cmd = f"samtools view -@ {options.cpu} -bS {samfilename_only_fungal_alignments} > {bamfilename_only_fungal_alignments}"
+        software = "samtools"
+        version = list_of_softwares_with_versions[software]
+        runSingularityCommand(logging, 
+                              "samtools", 
+                              version, 
+                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                              container_name = "samtools_convert_sam_to_bam", 
+                              volumes = volumes_list,
+                              command = cmd, 
+                              cpus = options.cpu, 
+                              memory = '200g')
+        logging.info(f"Fungal reads extracted from sample {samplename}")
+        
+        
+        if options.transfer:
+            cmd = f"mv {bamfilename_only_fungal_alignments} {options.temp_directory_alignments_to_fungal_reference}"
+            os.system(cmd)
+        
+        # Remove intermediate files
+        cmd = f"rm {options.main_directory_alignments_to_combined_reference}/{samplename}_Aligned.sortedByCoord.out.*am"
+        os.system(cmd)
+        
+        cmd = f"rm {samfilename_only_fungal_alignments}"
+        os.system(cmd)
+        
+    ################################################################################################################################################################################################################################################
+    # Generate fungal genome assembly
+    ################################################################################################################################################################################################################################################
+    
+    # Copy all fungal bam files to output directory
+    for row in options.metadata:
+        samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
+        if os.path.exists(f"{options.main_directory_alignments_to_fungal_reference}/{samplename}_Aligned.sortedByCoord.out.bam") == False:
+            cmd = f"cp {options.temp_directory_alignments_to_fungal_reference}/{samplename}_Aligned.sortedByCoord.out.bam {options.main_directory_alignments_to_fungal_reference}"
+            os.system(cmd)
+            
+    
+    # Compile a list of bam files
+    fhw = open(f"{options.main_directory_alignments_to_fungal_reference}/list_of_bam_files_replicates_separate","w")
+    for row in options.metadata:
+        samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
+        fhw.write(f"{options.main_directory_alignments_to_fungal_reference}/{samplename}_Aligned.sortedByCoord.out.bam"+"\n")
+    fhw.close()
+    
+    # Replicates not merged
+    cmd  = f" psiclass "
+    cmd += f" --lb {options.main_directory_alignments_to_fungal_reference}/list_of_bam_files_replicates_separate "
+    cmd += f" -o {options.psiclass_assembly_replicates_separate}/psiclass_output"
+    cmd += f" -p {options.cpu}"
+    cmd += f" --primaryParalog "
+    cmd += f" 1> {options.main_directory_spades_denovo_assembly}/psiclass_assembly_replicates_separate.output "
+    cmd += f" 2> {options.main_directory_spades_denovo_assembly}/psiclass_assembly_replicates_separate.error "
+    software = "psiclass"
+    version = list_of_softwares_with_versions[software]
+    
+    if os.path.exists(f"{options.psiclass_assembly_replicates_separate}/psiclass_output_vote.gtf") == False:
+        runSingularityCommand(logging, 
+                              "psiclass_replicates_separate", 
+                              version, 
+                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                              container_name = "gg_assembly_psiclass", 
+                              volumes = volumes_list,
+                              command = cmd, 
+                              cpus = options.cpu, 
+                              memory = '200g')
+    
+    # Merge replicates
+    replicates_group = {}
+    for row in options.metadata:
+        samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
+        if f"{cultivar}~{condition}~{timepoint}" not in replicates_group:
+            replicates_group[f"{cultivar}~{condition}~{timepoint}"] = []
+        replicates_group[f"{cultivar}~{condition}~{timepoint}"].append(samplename)
+        
+    fhw = open(f"{options.main_directory_alignments_to_fungal_reference}/list_of_bam_files_replicates_merged","w")
+    for category in replicates_group:
+        merged_bamfilename = f"{options.main_directory_alignments_to_fungal_reference}/{category}.bam"
+        fhw.write(merged_bamfilename + "\n")
+        
+        cmd  = f" samtools merge "
+        cmd += f" -@ {options.cpu} "
+        cmd += f" {merged_bamfilename} "
+        for samplename in replicates_group[category]:
+            cmd += f" {options.main_directory_alignments_to_fungal_reference}/{samplename}_Aligned.sortedByCoord.out.bam "
+        
+        software = "samtools"
+        version = list_of_softwares_with_versions[software]
+        runSingularityCommand(logging, 
+                              "samtools", 
+                              version, 
+                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                              container_name = "samtools_merge", 
+                              volumes = volumes_list,
+                              command = cmd, 
+                              cpus = options.cpu, 
+                              memory = '200g')
+    fhw.close()
+    
+    # Replicates merged
+    cmd  = f" psiclass "
+    cmd += f" --lb {options.main_directory_alignments_to_fungal_reference}/list_of_bam_files_replicates_merged "
+    cmd += f" -o {options.psiclass_assembly_replicates_merged}/psiclass_output"
+    cmd += f" -p {options.cpu}"
+    cmd += f" --primaryParalog "
+    cmd += f" 1> {options.main_directory_spades_denovo_assembly}/psiclass_assembly_replicates_merged.output "
+    cmd += f" 2> {options.main_directory_spades_denovo_assembly}/psiclass_assembly_replicates_merged.error "
+    
+    software = "psiclass"
+    version = list_of_softwares_with_versions[software]
+    if os.path.exists(f"{options.psiclass_assembly_replicates_merged}/psiclass_output_vote.gtf") == False:
+        runSingularityCommand(logging, 
+                          "psiclass_replicates_merged", 
+                          version, 
+                          image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                          container_name = "gg_assembly_psiclass", 
+                          volumes = volumes_list,
+                          command = cmd, 
+                          cpus = options.cpu, 
+                          memory = '200g')
+    
+    return 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     ################################################################################################################################################################################################################################################    
-    # De novo align the unmapped reads
+    # De novo assemble the unmapped reads
     ################################################################################################################################################################################################################################################
     if os.path.exists(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta") == False and os.path.exists(f"{options.temp_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta") == False:
         # Copy the input data for performing de novo assembly
@@ -520,8 +732,8 @@ def main():
             os.system(cmd)
     else:
         logging.info(f"Skipping generation of de novo assembly")
-        
     
+
     ################################################################################################################################################################################################################################################
     # Generate a single transcriptome from unmapped reads
     ################################################################################################################################################################################################################################################
@@ -561,7 +773,7 @@ def main():
     logging.info("All de novo assemblies are merged")
     
     # Generate CDHIT clusters
-    for cluster_similarity in [0.8, 0.85, 0.9,0.95]:
+    for cluster_similarity in [0.8, 0.85, 0.9, 0.95]:
         cmd  = f"cd-hit-est "
         cmd += f" -i {options.denovo_assembly}/merged_transcripts.fasta "
         cmd += f" -o {options.denovo_assembly}/merged_transcripts_cdhit_clusters_{cluster_similarity} "
@@ -587,186 +799,6 @@ def main():
             logging.info(f"CDHIT execution completed for cluster threshold {cluster_similarity}")  
     logging.info("CDHIT execution complete")
     
-    ################################################################################################################################################################################################################################################
-    # Extract alignments to the fungal references
-    ################################################################################################################################################################################################################################################
-    
-    # Read in the sequence ids in the fungal reference
-    fungal_references = []
-    fhr = open(options.ps_reference, "r")
-    for line in fhr:
-        if line[0] == ">":
-            fungal_references.append(line.strip()[1:])
-    fhr.close()
-    fungal_references = set(fungal_references)
-    sys.stdout.flush()
-    
-    for row in options.metadata:
-        samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
-        
-        bamfilename = f"{options.output_directory}/alignments/{samplename}_Aligned.sortedByCoord.out.bam"
-        samfilename = f"{options.output_directory}/alignments/{samplename}_Aligned.sortedByCoord.out.sam"
-        samfilename_only_fungal_alignments = f"{options.output_directory}/fungal_alignments/{samplename}_Aligned.sortedByCoord.out.sam"
-        bamfilename_only_fungal_alignments = f"{options.output_directory}/fungal_alignments/{samplename}_Aligned.sortedByCoord.out.bam"
-        
-        if os.path.exists(f"{options.temp_directory}/fungal_alignments/{samplename}_Aligned.sortedByCoord.out.bam") == True or os.path.exists(bamfilename_only_fungal_alignments) == True:
-            continue
-        
-        if os.path.exists(f"{options.temp_directory}/alignments/{samplename}_Aligned.sortedByCoord.out.bam") == True and os.path.exists(f"{options.output_directory}/alignments/{samplename}_Aligned.sortedByCoord.out.bam") == False:
-            cmd = f"cp {options.temp_directory}/alignments/{samplename}_Aligned.sortedByCoord.out.bam {options.output_directory}/alignments/"
-            os.system(cmd)
-        
-        # Convert the bamfile to samfile
-        cmd = f"samtools view -@ {options.cpu} -h {bamfilename} > {samfilename}"
-        software = "samtools"
-        version = list_of_softwares_with_versions[software]
-        runSingularityCommand(logging, 
-                              "samtools", 
-                              version, 
-                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
-                              container_name = "samtools_convert_bam_to_sam", 
-                              volumes = volumes_list,
-                              command = cmd, 
-                              cpus = options.cpu, 
-                              memory = '100g')
-        
-        # Extract the alignments to the fungal reference
-        fhr = open(samfilename, "r")
-        fhw = open(samfilename_only_fungal_alignments, "w")
-        for line in fhr:
-            if line[0] == "@":
-                if "@HD" in line:
-                    fhw.write(line)
-                elif line.strip().split("SN:")[-1].split()[0] in fungal_references:
-                    fhw.write(line)
-            else:
-                if line.strip().split()[2] in fungal_references:
-                    fhw.write(line)
-        fhw.close()
-        fhr.close()
-        
-        # Convert the extracted samfile to bamfile
-        cmd = f"samtools view -@ {options.cpu} -bS {samfilename_only_fungal_alignments} > {bamfilename_only_fungal_alignments}"
-        software = "samtools"
-        version = list_of_softwares_with_versions[software]
-        runSingularityCommand(logging, 
-                              "samtools", 
-                              version, 
-                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
-                              container_name = "samtools_convert_sam_to_bam", 
-                              volumes = volumes_list,
-                              command = cmd, 
-                              cpus = options.cpu, 
-                              memory = '100g')
-        logging.info(f"Fungal reads extracted from sample {samplename}")
-        
-        
-        if options.transfer:
-            cmd = f"mv {bamfilename_only_fungal_alignments} {options.temp_directory}/fungal_alignments"
-            os.system(cmd)
-        
-        # Remove intermediate files
-        cmd = f"rm {options.output_directory}/alignments/{samplename}_Aligned.sortedByCoord.out.*am"
-        os.system(cmd)
-        
-        cmd = f"rm {samfilename_only_fungal_alignments}"
-        os.system(cmd)
-        
-    ################################################################################################################################################################################################################################################
-    # Generate fungal genome assembly
-    ################################################################################################################################################################################################################################################
-    
-    # Copy all fungal bam files to output directory
-    
-    for row in options.metadata:
-        samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
-        if os.path.exists(f"{options.output_directory}/fungal_alignments/{samplename}_Aligned.sortedByCoord.out.bam") == False:
-            cmd = f"cp {options.temp_directory}/fungal_alignments/{samplename}_Aligned.sortedByCoord.out.bam {options.output_directory}/fungal_alignments"
-            os.system(cmd)
-            
-    
-    # Compile a list of bam files
-    
-    fhw = open(f"{options.output_directory}/fungal_alignments/list_of_bam_files_replicates_separate","w")
-    for row in options.metadata:
-        samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
-        fhw.write(f"{options.output_directory}/fungal_alignments/{samplename}_Aligned.sortedByCoord.out.bam"+"\n")
-    fhw.close()
-    
-    # Replicates not merged
-    cmd  = f" psiclass "
-    cmd += f" --lb {options.output_directory}/fungal_alignments/list_of_bam_files_replicates_separate "
-    cmd += f" -o {options.psiclass_assembly_replicates_separate}/psiclass_output"
-    cmd += f" -p {options.cpu}"
-    cmd += f" --primaryParalog "
-    cmd += f" 1> {options.psiclass_assembly_replicates_separate}.output "
-    cmd += f" 2> {options.psiclass_assembly_replicates_separate}.error "
-    software = "psiclass"
-    version = list_of_softwares_with_versions[software]
-    
-    if os.path.exists(f"{options.psiclass_assembly_replicates_separate}/psiclass_output_vote.gtf") == False:
-        runSingularityCommand(logging, 
-                              "psiclass_replicates_separate", 
-                              version, 
-                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
-                              container_name = "gg_assembly_psiclass", 
-                              volumes = volumes_list,
-                              command = cmd, 
-                              cpus = options.cpu, 
-                              memory = '100g')
-    
-    # Merge replicates
-    replicates_group = {}
-    for row in options.metadata:
-        samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
-        if f"{cultivar}~{condition}~{timepoint}" not in replicates_group:
-            replicates_group[f"{cultivar}~{condition}~{timepoint}"] = []
-        replicates_group[f"{cultivar}~{condition}~{timepoint}"].append(samplename)
-        
-    fhw = open(f"{options.output_directory}/fungal_alignments/list_of_bam_files_replicates_merged","w")
-    for category in replicates_group:
-        merged_bamfilename = f"{options.output_directory}/fungal_alignments/{category}.bam"
-        fhw.write(merged_bamfilename + "\n")
-        
-        cmd  = f" samtools merge "
-        cmd += f" -@ {options.cpu} "
-        cmd += f" {merged_bamfilename} "
-        for samplename in replicates_group[category]:
-            cmd += f" {options.output_directory}/fungal_alignments/{samplename}_Aligned.sortedByCoord.out.bam "
-        
-        software = "samtools"
-        version = list_of_softwares_with_versions[software]
-        runSingularityCommand(logging, 
-                              "samtools", 
-                              version, 
-                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
-                              container_name = "samtools_merge", 
-                              volumes = volumes_list,
-                              command = cmd, 
-                              cpus = options.cpu, 
-                              memory = '100g')
-    fhw.close()
-    
-    # Replicates merged
-    cmd  = f" psiclass "
-    cmd += f" --lb {options.output_directory}/fungal_alignments/list_of_bam_files_replicates_merged "
-    cmd += f" -o {options.psiclass_assembly_replicates_merged}/psiclass_output"
-    cmd += f" -p {options.cpu}"
-    cmd += f" --primaryParalog "
-    cmd += f" 1> {options.psiclass_assembly_replicates_merged}.output "
-    cmd += f" 2> {options.psiclass_assembly_replicates_merged}.error "
-    software = "psiclass"
-    version = list_of_softwares_with_versions[software]
-    if os.path.exists(f"{options.psiclass_assembly_replicates_merged}/psiclass_output_vote.gtf") == False:
-        runSingularityCommand(logging, 
-                          "psiclass_replicates_merged", 
-                          version, 
-                          image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
-                          container_name = "gg_assembly_psiclass", 
-                          volumes = volumes_list,
-                          command = cmd, 
-                          cpus = options.cpu, 
-                          memory = '100g')
     
     ################################################################################################################################################################################################################################################
     # Copy all output and errors to the temp directory
