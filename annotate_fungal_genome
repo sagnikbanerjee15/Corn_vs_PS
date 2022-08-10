@@ -463,20 +463,20 @@ def main():
         cmd_2 = f"cat "
         for row in options.metadata:
             samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
-            cmd_1 += f" {options.temp_directory_alignments}/{samplename}_Unmapped.out.mate1 "
-            cmd_2 += f" {options.temp_directory_alignments}/{samplename}_Unmapped.out.mate2 "
-        cmd_1 += f" > {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_1.fastq "
-        cmd_2 += f" > {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_2.fastq "
+            cmd_1 += f" {options.temp_directory_alignments}/{samplename}_Unmapped.out.mate1|gzip -c  "
+            cmd_2 += f" {options.temp_directory_alignments}/{samplename}_Unmapped.out.mate2|gzip -c "
+        cmd_1 += f" > {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_1.fastq.gz "
+        cmd_2 += f" > {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_2.fastq.gz "
         os.system(cmd_1)
         os.system(cmd_2)
         logging.info(f"Merging all unmapped reads from samples")
         
         if options.transfer:
-            cmd = f"cp {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_*.fastq {options.temp_directory_spades_denovo_assembly}"
+            cmd = f"cp {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_*.fastq.gz {options.temp_directory_spades_denovo_assembly}"
             os.system(cmd)
             logging.info(f"All unmapped merged reads copied to temp directory")
             
-            cmd = f"rm {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_*.fastq"
+            cmd = f"rm {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_*.fastq.gz "
             os.system(cmd)
     ################################################################################################################################################################################################################################################
     return
@@ -494,8 +494,8 @@ def main():
             
         cmd  = f"spades.py "
         cmd += f" --rna "
-        cmd += f" -1 {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_1.fastq "
-        cmd += f" -2 {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_2.fastq "
+        cmd += f" -1 {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_1.fastq.gz "
+        cmd += f" -2 {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_2.fastq.gz "
         cmd += f" --threads 20"
         cmd += f" -k 101 "
         cmd += f" -o {options.main_directory_spades_denovo_assembly}/merged_assembly "
