@@ -423,7 +423,8 @@ def main():
                     os.system(cmd)
                     cmd = f"cp {options.temp_directory_trimmed_reads}/{samplename}_2.fastq.gz {options.main_directory_trimmed_reads}"
                     os.system(cmd)            
-            cmd = f"STAR "
+            cmd  = f"STAR "
+            cmd += f" --runThreadN {options.cpu} "
             cmd += f" --genomeDir {options.main_directory_star_index}"
             cmd += f" --outSAMtype BAM SortedByCoordinate "
             cmd += f" --outFilterMultimapNmax 100 "  
@@ -519,6 +520,9 @@ def main():
                 os.system(cmd)
                 
                 cmd = f"mv {options.main_directory_alignments_to_combined_reference}/{samplename}*.out {options.temp_directory_alignments_to_combined_reference}"
+                os.system(cmd)
+                
+                cmd = f"mv {options.main_directory_alignments_to_combined_reference}/{samplename}*.out.mate* {options.temp_directory_alignments_to_combined_reference}"
                 os.system(cmd)
                 
                 cmd = f"mv {bamfilename_only_fungal_alignments} {options.temp_directory_alignments_to_fungal_reference}"
