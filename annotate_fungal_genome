@@ -412,7 +412,7 @@ def main():
                     cmd = f"cp {options.temp_directory_trimmed_reads}/{samplename}_2.fastq.gz {options.main_directory_trimmed_reads}"
                     os.system(cmd)            
             cmd = f"STAR "
-            cmd += f" --genomeDir {options.star_index}"
+            cmd += f" --genomeDir {options.main_directory_star_index}"
             cmd += f" --outSAMtype BAM SortedByCoordinate "
             cmd += f" --outFilterMultimapNmax 100 "  
             cmd += f" --alignIntronMin 20  "
