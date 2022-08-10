@@ -36,6 +36,7 @@ PE \
 /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped.out.mate1_unpaired.fq \
 /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped.out.mate2_trimmed.fq \
 /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped.out.mate2_unpaired.fq \
+ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 \
 1> /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped_trimmomatic.output \
 2> /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped_trimmomatic.error "
 
