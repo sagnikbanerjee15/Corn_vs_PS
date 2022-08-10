@@ -372,7 +372,7 @@ def main():
             cmd += f" {options.main_directory_raw_reads}/{samplename}_1.fastq.gz {options.main_directory_raw_reads}/{samplename}_2.fastq.gz " 
             cmd += f" {options.main_directory_trimmed_reads}/{samplename}_1.fastq.gz {options.main_directory_trimmed_reads}/{samplename}_1_unpaired.fastq.gz "
             cmd += f" {options.main_directory_trimmed_reads}/{samplename}_2.fastq.gz {options.main_directory_trimmed_reads}/{samplename}_2_unpaired.fastq.gz "
-            cmd += f" ILLUMINACLIP:/opt/conda/share/trimmomatic-0.39-2/adapters/TruSeq3-PE.fa:2:30:10 "
+            cmd += f" ILLUMINACLIP:/opt/conda/share/trimmomatic-0.39-2/adapters/TruSeq3-PE-2.fa:2:30:10 "
             cmd += f" MINLEN:100 "
             cmd += f" 1> {options.main_directory_outputs_and_errors}/{samplename}_trimmomatic_adapter_removal.output"
             cmd += f" 2> {options.main_directory_outputs_and_errors}/{samplename}_trimmomatic_adapter_removal.error"
