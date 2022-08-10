@@ -255,8 +255,8 @@ def main():
     os.system(f"mkdir -p {options.main_directory_trimmed_reads}")
     os.system(f"mkdir -p {options.temp_directory_trimmed_reads}")
     
-    options.main_directory_alignments_to_combined_reference = f"{options.output_directory}/alignments"
-    options.temp_directory_alignments_to_combined_reference = f"{options.temp_directory}/alignments"
+    options.main_directory_alignments_to_combined_reference = f"{options.output_directory}/alignments_combined_reference"
+    options.temp_directory_alignments_to_combined_reference = f"{options.temp_directory}/alignments_combined_reference"
     os.system(f"mkdir -p {options.main_directory_alignments_to_combined_reference}")
     os.system(f"mkdir -p {options.temp_directory_alignments_to_combined_reference}")
     
