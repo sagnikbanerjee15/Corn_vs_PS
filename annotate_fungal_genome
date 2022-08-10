@@ -34,7 +34,7 @@ def parseCommandLineArguments():
     # Optional arguments
     ##################################################################################################
     optional_named.add_argument( "--cpu", "-cpu", help = "Enter the number of CPUs. Please note that all alignments will be conducted using a single CPU. This argument will control how many parallel alignments can be launched", default = 1 )
-    optional_named.add_argument( "--memory", "-memory", help = "Maxmimum memory limit", defualt = '100')
+    optional_named.add_argument( "--memory", "-memory", help = "Maxmimum memory limit", default = '100')
     optional_named.add_argument( "--temp_directory", "-temp_dir", help = "Enter a temporary directory. All files will be dumped in this directory to prevent the output directory to get crowded. Outputs and Error files will not be moved", default = None )
     optional_named.add_argument( "--transfer", "--transfer", help = "Keep moving intermediate files and folders from the output directory to the temp directory to reduce space consumption. Developed for Ceres architecture", action = "store_true")
     optional_named.add_argument( "--framework", "-fm", help = "Enter your choice of framework", choices = ["docker", "singularity"], default = "docker" )
