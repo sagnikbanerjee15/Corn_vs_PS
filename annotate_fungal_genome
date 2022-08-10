@@ -363,7 +363,7 @@ def main():
                 os.system(cmd)
                 cmd = f"cp {location}/{samplename}_2.fastq.gz {options.main_directory_raw_reads}"
                 os.system(cmd)
-            logging.info(f"Copying raw files to main directory for {samplename}")
+            logging.info(f"Raw files copied to main directory for {samplename}")
         
             cmd  = f"trimmomatic "
             cmd += f" PE "
