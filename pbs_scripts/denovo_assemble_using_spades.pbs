@@ -25,7 +25,7 @@ REF_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS/data/reference"
 #cp /90daydata/maizegdb/sagnik/CORN_VS_PS/PS_SALSA_annotation/alignments/all_Unmapped.out.mate2 /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments/all_Unmapped.out.mate2.fq
 
 singularity exec -B /project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments:/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/alignments \
-/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/singularity_images/trimmomatic:3.9 \
+/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/singularity_images/trimmomatic:0.39 \
 bash -c \
 "trimmomatic \
 PE \
