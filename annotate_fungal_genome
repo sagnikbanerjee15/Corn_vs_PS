@@ -425,6 +425,7 @@ def main():
                     os.system(cmd)            
             cmd  = f"STAR "
             cmd += f" --runThreadN {options.cpu} "
+            cmd += f" --outBAMsortingThreadN {options.cpu}"
             cmd += f" --genomeDir {options.main_directory_star_index}"
             cmd += f" --outSAMtype BAM SortedByCoordinate "
             cmd += f" --outFilterMultimapNmax 100 "  
