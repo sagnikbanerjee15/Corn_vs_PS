@@ -358,7 +358,7 @@ def main():
         # Perform adapter trimming using trimmomatic
         ################################################################################################################################################################################################################################################
         
-        if os.path.exists(f"{options.main_directory_trimmed_reads}/{samplename}_1.fastq.gz") == False or os.path.exists(f"{options.temp_directory_trimmed_reads}/{samplename}_1.fastq.gz") == False or os.path.exists(f"{options.main_directory_trimmed_reads}/{samplename}_2.fastq.gz") == False or os.path.exists(f"{options.temp_directory_trimmed_reads}/{samplename}_2.fastq.gz") == False:
+        if (os.path.exists(f"{options.main_directory_trimmed_reads}/{samplename}_1.fastq.gz") == False and os.path.exists(f"{options.temp_directory_trimmed_reads}/{samplename}_1.fastq.gz") == False) or (os.path.exists(f"{options.main_directory_trimmed_reads}/{samplename}_2.fastq.gz") == False and os.path.exists(f"{options.temp_directory_trimmed_reads}/{samplename}_2.fastq.gz") == False):
             # Copy the raw data from the directory
             if ended == "SE":
                 cmd = f"cp {location}/{samplename}.fastq.gz {options.main_directory_raw_reads}"
