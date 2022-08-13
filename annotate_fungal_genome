@@ -548,21 +548,21 @@ def main():
     # Combine all unmapped reads
     ################################################################################################################################################################################################################################################
     logging.info("Starting to merge unmapped reads from all samples")
-    if os.path.exists(f"{options.temp_directory_spades_denovo_assembly}/all_unmapped_reads_1.fastq.gz") == False and os.path.exists(f"{options.temp_directory_spades_denovo_assembly}/all_unmapped_reads_2.fastq.gz") == False: 
+    if os.path.exists(f"{options.temp_directory_spades_denovo_assembly}/all_unmapped_reads_1.fastq") == False and os.path.exists(f"{options.temp_directory_spades_denovo_assembly}/all_unmapped_reads_2.fastq") == False: 
         cmd_1 = f"cat "
         cmd_2 = f"cat "
         for row in options.metadata:
             samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
-            cmd_1 += f" {options.temp_directory_alignments_to_combined_reference}/{samplename}_Unmapped.out.mate1|gzip -c  "
-            cmd_2 += f" {options.temp_directory_alignments_to_combined_reference}/{samplename}_Unmapped.out.mate2|gzip -c "
-        cmd_1 += f" > {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_1.fastq.gz "
-        cmd_2 += f" > {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_2.fastq.gz "
+            cmd_1 += f" {options.temp_directory_alignments_to_combined_reference}/{samplename}_Unmapped.out.mate1  "
+            cmd_2 += f" {options.temp_directory_alignments_to_combined_reference}/{samplename}_Unmapped.out.mate2"
+        cmd_1 += f" > {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_1.fastq "
+        cmd_2 += f" > {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_2.fastq "
         os.system(cmd_1)
         os.system(cmd_2)
         logging.info(f"Merging all unmapped reads from samples")
         
         if options.transfer:
-            cmd = f"cp {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_*.fastq.gz {options.temp_directory_spades_denovo_assembly}"
+            cmd = f"cp {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_*.fastq {options.temp_directory_spades_denovo_assembly}"
             os.system(cmd)
             logging.info(f"All unmapped merged reads copied to temp directory")
             
@@ -750,16 +750,10 @@ def main():
     logging.info("Starting de novo assembly")
     if os.path.exists(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta") == False and os.path.exists(f"{options.temp_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta") == False:
         # Copy the input data for performing de novo assembly
-        if os.path.exists(f"{options.main_directory_spades_denovo_assembly}/all_unmapped_reads_1.fastq.gz") == False or os.path.exists(f"{options.main_directory_spades_denovo_assembly}/all_unmapped_reads_2.fastq.gz") == False:
-            cmd = f"cp {options.temp_directory_spades_denovo_assembly}/all_unmapped_reads_*fastq.gz {options.main_directory_spades_denovo_assembly}"
+        if os.path.exists(f"{options.main_directory_spades_denovo_assembly}/all_unmapped_reads_1.fastq") == False or os.path.exists(f"{options.main_directory_spades_denovo_assembly}/all_unmapped_reads_2.fastq") == False:
+            cmd = f"cp {options.temp_directory_spades_denovo_assembly}/all_unmapped_reads_*fastq {options.main_directory_spades_denovo_assembly}"
             os.system(cmd)
             logging.info(f"Merged unmapped files copied from temp directory")
-            
-        cmd = f"gunzip {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_1.fastq.gz"
-        os.system(cmd)
-        
-        cmd = f"gunzip {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_2.fastq.gz"
-        os.system(cmd)
         
         cmd  = f"spades.py "
         cmd += f" --rna "
