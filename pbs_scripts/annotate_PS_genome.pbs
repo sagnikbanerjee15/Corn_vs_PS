@@ -1,11 +1,11 @@
 #!/bin/bash
 
-#SBATCH -n 72
+#SBATCH -n 20
 #SBATCH -N 1
-#SBATCH --partition=medium
+#SBATCH --partition=mem
 ##SBATCH --partition=priority-mem768
 #SBATCH --qos=maizegdb
-#SBATCH --mem=300G
+#SBATCH --mem=1500G
 #SBATCH --time=7-00:00:00
 #SBATCH --job-name="Annotate_Fungal_Genome"
 #SBATCH --mail-user=sagnikbanerjee15@gmail.com
@@ -26,7 +26,7 @@ ${ROOT_DIR}/Corn_vs_PS/annotate_fungal_genome \
 --output_directory ${ROOT_DIR}/data/PS_SALSA_annotation \
 --reference ${REF_DIR}/combined_B73_PS_SALSA/genome.fasta \
 --ps_reference ${REF_DIR}/CR-IA16-P.sorghi-genome/SALSA/salsa_phase_hic.fasta \
---cpu 72 \
+--cpu 20 \
 --temp_directory ${TEMP_DIR}/PS_SALSA_annotation \
 --transfer \
 --framework singularity \
