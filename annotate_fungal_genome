@@ -760,8 +760,8 @@ def main():
         
         cmd  = f"spades.py "
         cmd += f" --rna "
-        cmd += f" --pe1-1 {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_1.fastq "
-        cmd += f" --pe1-2 {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_2.fastq "
+        cmd += f" -1 {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_1.fastq "
+        cmd += f" -2 {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_2.fastq "
         cmd += f" --threads 20"
         cmd += f" -k 101 "
         cmd += f" -o {options.main_directory_spades_denovo_assembly}/merged_assembly "
