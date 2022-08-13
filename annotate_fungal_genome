@@ -626,7 +626,7 @@ def main():
     software = "psiclass"
     version = list_of_softwares_with_versions[software]
     
-    if os.path.exists(f"{options.psiclass_assembly_replicates_separate}/psiclass_output_vote.gtf") == False:
+    if os.path.exists(f"{options.main_directory_psiclass_assembly_replicates_separate}/psiclass_output_vote.gtf") == False:
         runSingularityCommand(logging, 
                               "psiclass_replicates_separate", 
                               version, 
@@ -680,7 +680,7 @@ def main():
     
     software = "psiclass"
     version = list_of_softwares_with_versions[software]
-    if os.path.exists(f"{options.psiclass_assembly_replicates_merged}/psiclass_output_vote.gtf") == False:
+    if os.path.exists(f"{options.main_directory_psiclass_assembly_replicates_merged}/psiclass_output_vote.gtf") == False:
         runSingularityCommand(logging, 
                           "psiclass_replicates_merged", 
                           version, 
