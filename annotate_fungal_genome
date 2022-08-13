@@ -755,7 +755,10 @@ def main():
             os.system(cmd)
             logging.info(f"Merged unmapped files copied from temp directory")
             
-        cmd = f"gunzip {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_*.fastq"
+        cmd = f"gunzip {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_1.fastq"
+        os.system(cmd)
+        
+        cmd = f"gunzip {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_2.fastq"
         os.system(cmd)
         
         cmd  = f"spades.py "
