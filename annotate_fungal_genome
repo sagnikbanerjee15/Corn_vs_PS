@@ -751,7 +751,7 @@ def main():
     if os.path.exists(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta") == False and os.path.exists(f"{options.temp_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta") == False:
         # Copy the input data for performing de novo assembly
         if os.path.exists(f"{options.main_directory_spades_denovo_assembly}/all_unmapped_reads_1.fastq") == False or os.path.exists(f"{options.main_directory_spades_denovo_assembly}/all_unmapped_reads_2.fastq") == False:
-            cmd = f"cp {options.temp_directory_spades_denovo_assembly}/all_unmapped_reads_*fastq {options.main_directory_spades_denovo_assembly}"
+            cmd = f"cp {options.temp_directory_spades_denovo_assembly}/all_unmapped_reads_*fastq.gz {options.main_directory_spades_denovo_assembly}"
             os.system(cmd)
             logging.info(f"Merged unmapped files copied from temp directory")
             
