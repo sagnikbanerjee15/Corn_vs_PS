@@ -273,7 +273,7 @@ def main():
     options.main_directory_psiclass_assembly_replicates_merged = f"{options.output_directory}/psiclass_assembly_replicates_merged"
     options.temp_directory_psiclass_assembly_replicates_merged = f"{options.temp_directory}/psiclass_assembly_replicates_merged"
     os.system(f"mkdir -p {options.main_directory_psiclass_assembly_replicates_merged}")
-    os.system(f"mkdir -p {options.main_directory_psiclass_assembly_replicates_merged}")
+    os.system(f"mkdir -p {options.temp_directory_psiclass_assembly_replicates_merged}")
     
     options.main_directory_psiclass_assembly_replicates_separate = f"{options.output_directory}/psiclass_assembly_replicates_separate"
     options.temp_directory_psiclass_assembly_replicates_separate = f"{options.temp_directory}/psiclass_assembly_replicates_separate"
@@ -618,11 +618,11 @@ def main():
     # Replicates not merged
     cmd  = f" psiclass "
     cmd += f" --lb {options.main_directory_alignments_to_fungal_reference}/list_of_bam_files_replicates_separate "
-    cmd += f" -o {options.psiclass_assembly_replicates_separate}/psiclass_output"
+    cmd += f" -o {options.main_directory_psiclass_assembly_replicates_separate}/psiclass_output"
     cmd += f" -p {options.cpu}"
     cmd += f" --primaryParalog "
-    cmd += f" 1> {options.main_directory_spades_denovo_assembly}/psiclass_assembly_replicates_separate.output "
-    cmd += f" 2> {options.main_directory_spades_denovo_assembly}/psiclass_assembly_replicates_separate.error "
+    cmd += f" 1> {options.main_directory_outputs_and_errors}/psiclass_assembly_replicates_separate.output "
+    cmd += f" 2> {options.main_directory_outputs_and_errors}/psiclass_assembly_replicates_separate.error "
     software = "psiclass"
     version = list_of_softwares_with_versions[software]
     
@@ -672,11 +672,11 @@ def main():
     # Replicates merged
     cmd  = f" psiclass "
     cmd += f" --lb {options.main_directory_alignments_to_fungal_reference}/list_of_bam_files_replicates_merged "
-    cmd += f" -o {options.psiclass_assembly_replicates_merged}/psiclass_output"
+    cmd += f" -o {options.main_directory_psiclass_assembly_replicates_merged}/psiclass_output"
     cmd += f" -p {options.cpu}"
     cmd += f" --primaryParalog "
-    cmd += f" 1> {options.main_directory_spades_denovo_assembly}/psiclass_assembly_replicates_merged.output "
-    cmd += f" 2> {options.main_directory_spades_denovo_assembly}/psiclass_assembly_replicates_merged.error "
+    cmd += f" 1> {options.main_directory_outputs_and_errors}/psiclass_assembly_replicates_merged.output "
+    cmd += f" 2> {options.main_directory_outputs_and_errors}/psiclass_assembly_replicates_merged.error "
     
     software = "psiclass"
     version = list_of_softwares_with_versions[software]
@@ -705,6 +705,8 @@ def main():
         cmd += f" -p {options.cpu} "
         cmd += f" -m 300 "
         cmd += f" {options.main_directory_stringtie_assembly}/all_samples_merged.bam "
+        cmd += f" 1> {options.main_directory_outputs_and_errors}/stringtie_assembly.output "
+        cmd += f" 2> {options.main_directory_outputs_and_errors}/stringtie_assembly.error "
     
         software = "stringtie"
         version = list_of_softwares_with_versions[software]
