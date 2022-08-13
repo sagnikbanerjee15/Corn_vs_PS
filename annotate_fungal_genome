@@ -266,9 +266,9 @@ def main():
     os.system(f"mkdir -p {options.temp_directory_alignments_to_fungal_reference}")
     
     options.main_directory_spades_denovo_assembly = f"{options.output_directory}/spades_denovo_assembly"
-    options.temp_directory_denovo_assembly = f"{options.temp_directory}/spades_denovo_assembly"
+    options.temp_directory_spades_denovo_assembly = f"{options.temp_directory}/spades_denovo_assembly"
     os.system(f"mkdir -p {options.main_directory_spades_denovo_assembly}")
-    os.system(f"mkdir -p {options.temp_directory_denovo_assembly}")
+    os.system(f"mkdir -p {options.temp_directory_spades_denovo_assembly}")
     
     options.main_directory_psiclass_assembly_replicates_merged = f"{options.output_directory}/psiclass_assembly_replicates_merged"
     options.temp_directory_psiclass_assembly_replicates_merged = f"{options.temp_directory}/psiclass_assembly_replicates_merged"
@@ -571,7 +571,11 @@ def main():
     
       
     ################################################################################################################################################################################################################################################
-    # Generate fungal genome assembly
+    # Generate fungal genome assembly genome guided
+    ################################################################################################################################################################################################################################################
+    
+    ################################################################################################################################################################################################################################################
+    # PsiCLASS
     ################################################################################################################################################################################################################################################
     
     # Copy all fungal bam files to output directory
@@ -581,6 +585,28 @@ def main():
             cmd = f"cp {options.temp_directory_alignments_to_fungal_reference}/{samplename}_Aligned.sortedByCoord.out.bam {options.main_directory_alignments_to_fungal_reference}"
             os.system(cmd)
             
+    # Merge all fungal bam files into one
+    cmd  = f"samtools merge "
+    cmd += f" -@ {options.cpu} "
+    cmd += f" -o {options.main_directory_stringtie_assembly}/all_samples_merged.bam "
+    for row in options.metadata:
+        samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
+        cmd += f" {options.main_directory_alignments_to_fungal_reference}/{samplename}_Aligned.sortedByCoord.out.bam "
+    if os.path.exists(f"{options.main_directory_stringtie_assembly}/all_samples_merged.bam") == False:
+        software = "samtools"
+        version = list_of_softwares_with_versions[software]
+        runSingularityCommand(logging, 
+                          "samtools_merge", 
+                          version, 
+                          image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                          container_name = "samtools_merge", 
+                          volumes = volumes_list,
+                          command = cmd, 
+                          cpus = options.cpu, 
+                          memory = f'{options.memory}g')
+        if options.transfer:
+            cmd = f"cp {options.main_directory_stringtie_assembly}/all_samples_merged.bam {options.temp_directory_stringtie_assembly}"
+            os.system(cmd)
     
     # Compile a list of bam files
     fhw = open(f"{options.main_directory_alignments_to_fungal_reference}/list_of_bam_files_replicates_separate","w")
@@ -665,14 +691,39 @@ def main():
                           cpus = options.cpu, 
                           memory = f'{options.memory}g')
     
-    return 
+     
     
+    ################################################################################################################################################################################################################################################
+    # Stringtie
+    ################################################################################################################################################################################################################################################
     
+    # Merge all the fungal alignments
     
+    if os.path.exists(f"{options.main_directory_stringtie_assembly}/all_samples_merged.gtf") == False or os.path.exists(f"{options.temp_directory_stringtie_assembly}/all_samples_merged.gtf") == False:
+        cmd  = "stringtie"
+        cmd += f" -o {options.main_directory_stringtie_assembly}/all_samples_merged.gtf "
+        cmd += f" -p {options.cpu} "
+        cmd += f" -m 300 "
+        cmd += f" {options.main_directory_stringtie_assembly}/all_samples_merged.bam "
     
+        software = "stringtie"
+        version = list_of_softwares_with_versions[software]
+        
+        runSingularityCommand(logging, 
+                          "stringtie_assembly", 
+                          version, 
+                          image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                          container_name = "gg_assembly_stringtie", 
+                          volumes = volumes_list,
+                          command = cmd, 
+                          cpus = options.cpu, 
+                          memory = f'{options.memory}g')
+        
+        if options.transfer:
+            cmd = f"mv {options.main_directory_stringtie_assembly}/all_samples_merged.gtf {options.temp_directory_stringtie_assembly}/all_samples_merged.gtf"
+            os.system(cmd)
     
-    
-    
+    return
     
     
     
