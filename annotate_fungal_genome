@@ -547,7 +547,7 @@ def main():
     ################################################################################################################################################################################################################################################
     # Combine all unmapped reads
     ################################################################################################################################################################################################################################################
-    if os.path.exists(f"{options.main_directory_spades_denovo_assembly}/all_unmapped_reads_1.fastq") == False or os.path.exists(f"{options.main_directory_spades_denovo_assembly}/all_unmapped_reads_2.fastq") == False or os.path.exists(f"{options.temp_directory_spades_denovo_assembly}/all_unmapped_reads_1.fastq") == False or os.path.exists(f"{options.temp_directory_spades_denovo_assembly}/all_unmapped_reads_2.fastq") == False: 
+    if (os.path.exists(f"{options.main_directory_spades_denovo_assembly}/all_unmapped_reads_1.fastq") == False or os.path.exists(f"{options.main_directory_spades_denovo_assembly}/all_unmapped_reads_2.fastq") == False) and (os.path.exists(f"{options.temp_directory_spades_denovo_assembly}/all_unmapped_reads_1.fastq") == False or os.path.exists(f"{options.temp_directory_spades_denovo_assembly}/all_unmapped_reads_2.fastq") == False): 
         cmd_1 = f"cat "
         cmd_2 = f"cat "
         for row in options.metadata:
