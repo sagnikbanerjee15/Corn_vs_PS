@@ -150,7 +150,8 @@ def lengthOfLongestORF(sequence):
     for translated_sequence in translated_sequences:
         length_of_translated_segments = [len(segment) for segment in translated_sequence.split("_")]
         max_length_of_segments.append(max(length_of_translated_segments))
-        
+    
+    print(max_length_of_segments)
     return max(max_length_of_segments)
     
 def main():
