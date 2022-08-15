@@ -799,7 +799,7 @@ def main():
     # Select transcripts that have an ORF of least 50 aa
     ################################################################################################################################################################################################################################################
     min_ORF_length = 50
-    cmd = f"perl -pe 'chomp unless /^>/' {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta > {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta.temp"
+    cmd = f"perl -pe '/^>/ ? print \"\n\" : chomp' {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta|tail -n +2  > {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta.temp"
     os.system(cmd)
     
     cmd = f"mv {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta.temp {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta"
