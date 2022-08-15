@@ -859,46 +859,29 @@ def main():
     # Select the representative sequences from each cluster
     
     if os.path.exists(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts_for_round_2_cdhit_clusters_{cluster_similarity}.clstr") == False:
-        representative_sequences = []
-        fhr = open(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts_cdhit_clusters_{cluster_similarity}.clstr", "r")
-        for line in fhr:
-            if line[0] == ">":
-                representative_sequences.append(fhr.readline().strip().split(">")[-1].split("...")[0])
-        fhr.close()
-        representative_sequences=set(representative_sequences)
-        
-        fhr = open(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta","r")
-        fhw = open(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts_for_round_2.fasta","w")
-        for line in fhr:
-            if line[0] == ">":
-                if line.strip() in representative_sequences:
-                    fhw.write(line[0]+"\n"+fhr.readline())
-        fhw.close()
-        fhr.close()
-    
-    for cluster_similarity in [0.8]:
-        cmd  = f"cd-hit-est "
-        cmd += f" -i {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts_for_round_2.fasta "
-        cmd += f" -o {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts_for_round_2_cdhit_clusters_{cluster_similarity} "
-        cmd += f" -c {cluster_similarity} "
-        cmd += f" -T {options.cpu} "
-        cmd += f" -d 0 "
-        cmd += f" -M 10000 "
-        cmd += f" 1> {options.main_directory_outputs_and_errors}/transcripts_for_round_2_cdhit_clusters_{cluster_similarity}.output "
-        cmd += f" 2> {options.main_directory_outputs_and_errors}/transcripts_for_round_2_cdhit_clusters_{cluster_similarity}.error "
-        
-        software = "cdhit"
-        version = list_of_softwares_with_versions[software]
-        runSingularityCommand(logging, 
-                              "CDHIT", 
-                              version, 
-                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
-                              container_name = "star_alignment",
-                              volumes = volumes_list,
-                              command = cmd, 
-                              cpus = options.cpu, 
-                              memory = f'{options.memory}g')
-        logging.info(f"CDHIT execution completed for cluster threshold {cluster_similarity} round 2")  
+        for cluster_similarity in [0.8]:
+            cmd  = f"cd-hit-est "
+            cmd += f" -i {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts_cdhit_clusters_0.8 "
+            cmd += f" -o {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts_for_round_2_cdhit_clusters_{cluster_similarity} "
+            cmd += f" -c {cluster_similarity} "
+            cmd += f" -T {options.cpu} "
+            cmd += f" -d 0 "
+            cmd += f" -M 10000 "
+            cmd += f" 1> {options.main_directory_outputs_and_errors}/transcripts_for_round_2_cdhit_clusters_{cluster_similarity}.output "
+            cmd += f" 2> {options.main_directory_outputs_and_errors}/transcripts_for_round_2_cdhit_clusters_{cluster_similarity}.error "
+            
+            software = "cdhit"
+            version = list_of_softwares_with_versions[software]
+            runSingularityCommand(logging, 
+                                  "CDHIT", 
+                                  version, 
+                                  image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                                  container_name = "star_alignment",
+                                  volumes = volumes_list,
+                                  command = cmd, 
+                                  cpus = options.cpu, 
+                                  memory = f'{options.memory}g')
+            logging.info(f"CDHIT execution completed for cluster threshold {cluster_similarity} round 2")  
     logging.info("CDHIT execution complete")
     
     ################################################################################################################################################################################################################################################
