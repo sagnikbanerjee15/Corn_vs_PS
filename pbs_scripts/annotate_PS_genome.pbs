@@ -2,11 +2,11 @@
 
 #SBATCH -n 1
 #SBATCH -N 1
-#SBATCH --partition=medium
+#SBATCH --partition=short
 ##SBATCH --partition=priority-mem768
 #SBATCH --qos=maizegdb
 #SBATCH --mem=300G
-#SBATCH --time=7-00:00:00
+#SBATCH --time=2-00:00:00
 #SBATCH --job-name="Annotate_Fungal_Genome"
 #SBATCH --mail-user=sagnikbanerjee15@gmail.com
 #SBATCH --mail-type=BEGIN
