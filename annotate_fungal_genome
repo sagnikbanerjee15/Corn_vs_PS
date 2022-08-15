@@ -798,29 +798,33 @@ def main():
     ################################################################################################################################################################################################################################################
     # Select transcripts that have an ORF of least 50 aa
     ################################################################################################################################################################################################################################################
-    min_ORF_length = 50
-    cmd = f"perl -pe '/^>/ ? print \"\n\" : chomp' {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta|tail -n +2  > {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta.temp"
-    os.system(cmd)
     
-    cmd = f"mv {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta.temp {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta"
-    os.system(cmd)
+    min_ORF_length = 100
+    if os.path.exists(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts_larger_than_{min_ORF_length}_aa.fasta") == False:
+        cmd = f"perl -pe '/^>/ ? print \"\n\" : chomp' {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta|tail -n +2  > {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta.temp"
+        os.system(cmd)
+        
+        cmd = f"mv {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta.temp {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta"
+        os.system(cmd)
+        
+        all_spades_assembled_transcripts = {}
+        fhr = open(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta","r")
+        for line in fhr:
+            if line[0] == ">":
+                all_spades_assembled_transcripts[line.strip()[1:]] = fhr.readline().strip()
+        fhr.close()
+        
+        selected_all_spades_assembled_transcripts = {}
+        for seq_id in all_spades_assembled_transcripts:
+            if lengthOfLongestORF(all_spades_assembled_transcripts[seq_id]) >= min_ORF_length:
+                selected_all_spades_assembled_transcripts[seq_id] = all_spades_assembled_transcripts[seq_id]
+        
+        fhw = open(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts_larger_than_{min_ORF_length}_aa.fasta","w")
+        for seq_id in selected_all_spades_assembled_transcripts:
+            fhw.write(f">{seq_id}\n{selected_all_spades_assembled_transcripts[seq_id]}\n")
+        fhw.close()
     
-    all_spades_assembled_transcripts = {}
-    fhr = open(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta","r")
-    for line in fhr:
-        if line[0] == ">":
-            all_spades_assembled_transcripts[line.strip()[1:]] = fhr.readline().strip()
-    fhr.close()
     
-    selected_all_spades_assembled_transcripts = {}
-    for seq_id in all_spades_assembled_transcripts:
-        if lengthOfLongestORF(all_spades_assembled_transcripts[seq_id]) >= min_ORF_length:
-            selected_all_spades_assembled_transcripts[seq_id] = all_spades_assembled_transcripts[seq_id]
-    
-    fhw = open(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts_larger_than_{min_ORF_length}_aa.fasta","w")
-    for seq_id in selected_all_spades_assembled_transcripts:
-        fhw.write(f">{seq_id}\n{selected_all_spades_assembled_transcripts[seq_id]}\n")
-    fhw.close()
     ################################################################################################################################################################################################################################################
     # Copy all output and errors to the temp directory
     ################################################################################################################################################################################################################################################
