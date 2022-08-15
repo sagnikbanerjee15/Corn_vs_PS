@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH -n 72
+#SBATCH -n 1
 #SBATCH -N 1
 #SBATCH --partition=medium
 ##SBATCH --partition=priority-mem768
@@ -26,7 +26,7 @@ ${ROOT_DIR}/Corn_vs_PS/annotate_fungal_genome \
 --output_directory ${ROOT_DIR}/data/PS_SALSA_annotation \
 --reference ${REF_DIR}/combined_B73_PS_SALSA/genome.fasta \
 --ps_reference ${REF_DIR}/CR-IA16-P.sorghi-genome/SALSA/salsa_phase_hic.fasta \
---cpu 72 \
+--cpu 1 \
 --temp_directory ${TEMP_DIR}/PS_SALSA_annotation \
 --transfer \
 --framework singularity \
