@@ -805,7 +805,7 @@ def main():
     os.system(cmd)
     
     all_spades_assembled_transcripts = {}
-    fhr = open(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts_blast_to_nt","r")
+    fhr = open(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta","r")
     for line in fhr:
         if line[0] == ">":
             all_spades_assembled_transcripts[line.strip()[1:]] = fhr.readline().strip()
