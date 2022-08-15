@@ -776,8 +776,9 @@ def main():
         cmd += f" -query {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta "
         cmd += f" -out {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts_blast_to_nt "
         cmd += f" -db {options.main_directory_spades_denovo_assembly}/../ncbi_blast_run/nt/nt "
-        cmd += f" -outfmt '7 qseqid qlen sseqid slen evalue bitscore length pident qcovs ssciname sskingdom staxids' "
+        cmd += f" -outfmt '7 qseqid qlen sseqid slen evalue bitscore length pident qcovs ssciname scomname sskingdom staxids' "
         cmd += f" -num_threads {options.cpu} "
+        cmd += f" -num_alignments 10 "
         cmd += f" 1> {options.main_directory_outputs_and_errors}/transcripts_blast_to_nt.output "
         cmd += f" 2> {options.main_directory_outputs_and_errors}/transcripts_blast_to_nt.error "
         
