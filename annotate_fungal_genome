@@ -823,6 +823,35 @@ def main():
         for seq_id in selected_all_spades_assembled_transcripts:
             fhw.write(f">{seq_id}\n{selected_all_spades_assembled_transcripts[seq_id]}\n")
         fhw.close()
+        
+    ################################################################################################################################################################################################################################################
+    # Generate CDHIT clusters
+    ################################################################################################################################################################################################################################################
+    for cluster_similarity in [0.8]:
+        cmd  = f"cd-hit-est "
+        cmd += f" -i {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta "
+        cmd += f" -o {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts_cdhit_clusters_{cluster_similarity} "
+        cmd += f" -c {cluster_similarity} "
+        cmd += f" -T {options.cpu} "
+        cmd += f" -d 0 "
+        cmd += f" -M 10000 "
+        cmd += f" 1> {options.main_directory_outputs_and_errors}/merged_transcripts_cdhit_clusters_{cluster_similarity}.output "
+        cmd += f" 2> {options.main_directory_outputs_and_errors}/merged_transcripts_cdhit_clusters_{cluster_similarity}.error "
+        
+        if os.path.exists(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts_cdhit_clusters_{cluster_similarity}.clstr") == False:
+            software = "cdhit"
+            version = list_of_softwares_with_versions[software]
+            runSingularityCommand(logging, 
+                                  "CDHIT", 
+                                  version, 
+                                  image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                                  container_name = "star_alignment",
+                                  volumes = volumes_list,
+                                  command = cmd, 
+                                  cpus = options.cpu, 
+                                  memory = f'{options.memory}g')
+            logging.info(f"CDHIT execution completed for cluster threshold {cluster_similarity}")  
+    logging.info("CDHIT execution complete")
     
     
     ################################################################################################################################################################################################################################################
