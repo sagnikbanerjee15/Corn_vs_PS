@@ -866,6 +866,7 @@ def main():
             cmd += f" -c {cluster_similarity} "
             cmd += f" -T {options.cpu} "
             cmd += f" -d 0 "
+            cmd += f" -G 0 -aS 80 "
             cmd += f" -M 10000 "
             cmd += f" 1> {options.main_directory_outputs_and_errors}/transcripts_for_round_2_cdhit_clusters_{cluster_similarity}.output "
             cmd += f" 2> {options.main_directory_outputs_and_errors}/transcripts_for_round_2_cdhit_clusters_{cluster_similarity}.error "
