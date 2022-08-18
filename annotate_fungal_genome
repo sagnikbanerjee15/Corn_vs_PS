@@ -888,8 +888,39 @@ def main():
                               memory = f'{options.memory}g')
         logging.info(f"STAR genome generated for de novo assembled transcripts")
         
-    
-    
+    if os.path.exists(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/all_unmapped_reads_aligned_to_denovo_assembled_transcriptome_Aligned.sortedByCoord.out.bam") == False:
+        cmd  = f"STAR "
+        cmd += f" --runThreadN {options.cpu} "
+        cmd += f" --outBAMsortingThreadN {options.cpu}"
+        cmd += f" --genomeDir {options.main_directory_star_index}"
+        cmd += f" --outSAMtype BAM SortedByCoordinate "
+        cmd += f" --outFilterMultimapNmax 100 "  
+        cmd += f" --alignIntronMin 20  "
+        cmd += f" --alignIntronMax 10000 "
+        cmd += f" --limitBAMsortRAM 107374182400 "
+        cmd += f" --alignEndsType Local " # ALLOWS soft clipping 
+        cmd += f" --outSAMprimaryFlag AllBestScore "
+        cmd += f" --outFilterScoreMinOverLread 0.7"
+        cmd += f" --outFilterMatchNminOverLread 0.7 "
+        cmd += f" --outSAMattributes NH HI AS nM NM MD jM jI XS "
+        cmd += f" --outReadsUnmapped Fastx "
+        cmd += f" --outFileNamePrefix {options.main_directory_spades_denovo_assembly}/merged_assembly/all_unmapped_reads_aligned_to_denovo_assembled_transcriptome_"
+        cmd += f" --readFilesCommand zcat "
+        cmd += f" --readFilesIn {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_1.fastq {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_2.fastq "
+        cmd += f" 1> {options.main_directory_outputs_and_errors}/all_unmapped_reads_aligned_to_denovo_assembled_transcriptome.output "
+        cmd += f" 2> {options.main_directory_outputs_and_errors}/all_unmapped_reads_aligned_to_denovo_assembled_transcriptome.error "
+        
+        software = "star"
+        version = list_of_softwares_with_versions[software]
+        runSingularityCommand(logging, 
+                              "STAR", 
+                              version, 
+                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                              container_name = f"star_alignment_{samplename}",
+                              volumes = volumes_list,
+                              command = cmd, 
+                              cpus = options.cpu, 
+                              memory = f'{options.memory}g')
     
     ################################################################################################################################################################################################################################################
     # Copy all output and errors to the temp directory
