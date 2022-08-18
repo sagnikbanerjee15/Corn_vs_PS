@@ -15,6 +15,7 @@ import random
 import glob
 import time
 import subprocess
+from astropy.units import femtotesla
 
 
 def parseCommandLineArguments():
@@ -850,40 +851,45 @@ def main():
                                   command = cmd, 
                                   cpus = options.cpu, 
                                   memory = f'{options.memory}g')
-            logging.info(f"CDHIT execution completed for cluster threshold {cluster_similarity} round 1")  
-    
-    ################################################################################################################################################################################################################################################
-    # Generate CDHIT clusters - Round 2 
-    ################################################################################################################################################################################################################################################
-    
-    # Select the representative sequences from each cluster
-    
-    if os.path.exists(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts_for_round_2_cdhit_clusters_{cluster_similarity}.clstr") == False:
-        for cluster_similarity in [0.8]:
-            cmd  = f"cd-hit-est "
-            cmd += f" -i {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts_cdhit_clusters_0.8 "
-            cmd += f" -o {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts_for_round_2_cdhit_clusters_{cluster_similarity} "
-            cmd += f" -c {cluster_similarity} "
-            cmd += f" -T {options.cpu} "
-            cmd += f" -d 0 "
-            cmd += f" -G 0 -aS 80 "
-            cmd += f" -M 10000 "
-            cmd += f" 1> {options.main_directory_outputs_and_errors}/transcripts_for_round_2_cdhit_clusters_{cluster_similarity}.output "
-            cmd += f" 2> {options.main_directory_outputs_and_errors}/transcripts_for_round_2_cdhit_clusters_{cluster_similarity}.error "
+            logging.info(f"CDHIT execution completed for cluster threshold {cluster_similarity} round 1")
             
-            software = "cdhit"
-            version = list_of_softwares_with_versions[software]
-            runSingularityCommand(logging, 
-                                  "CDHIT", 
-                                  version, 
-                                  image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
-                                  container_name = "star_alignment",
-                                  volumes = volumes_list,
-                                  command = cmd, 
-                                  cpus = options.cpu, 
-                                  memory = f'{options.memory}g')
-            logging.info(f"CDHIT execution completed for cluster threshold {cluster_similarity} round 2")  
-    logging.info("CDHIT execution complete")
+    ################################################################################################################################################################################################################################################
+    # Remap unmapped reads to the entire de novo assembled transcriptome
+    ################################################################################################################################################################################################################################################
+    
+    # Create star index of the de novo assembled transcriptome
+    fhr = open(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta","r")
+    num_of_contigs = 0
+    total_lenth_of_contigs = 0
+    for line in fhr:
+        if line[0] == ">":
+            num_of_contigs += 1
+            total_lenth_of_contigs += len(line.strip())
+    fhr.close()
+    
+    if os.path.exists(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/star_index/genomeParameters.txt") == False and os.path.exists(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/star_index/genomeParameters.txt") == False:
+        cmd  = f"STAR"
+        cmd += f" --runThreadN {options.cpu} "
+        cmd += f" --runMode genomeGenerate "
+        cmd += f" --genomeSAindexNbases {min(14,math.log2(total_lenth_of_contigs)/2-1)}"
+        cmd += f" --genomeChrBinNbits {min(18,math.log2(total_lenth_of_contigs/num_of_contigs))}"
+        cmd += f" --genomeDir {options.main_directory_spades_denovo_assembly}/merged_assembly/star_index"
+        cmd += f" --genomeFastaFiles {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta"
+        software = "star"
+        version = list_of_softwares_with_versions[software]
+        runSingularityCommand(logging, 
+                              "STAR", 
+                              version, 
+                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                              container_name = "star_genome_generate",
+                              volumes = volumes_list,
+                              command = cmd, 
+                              cpus = options.cpu, 
+                              memory = f'{options.memory}g')
+        logging.info(f"STAR genome generated for de novo assembled transcripts")
+        
+    
+    
     
     ################################################################################################################################################################################################################################################
     # Copy all output and errors to the temp directory

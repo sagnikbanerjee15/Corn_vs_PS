@@ -104,6 +104,8 @@ Verification was perfomed by mapping RNA-Seq data (samples 113-122) from S2 and 
 
 # PS IA16 Genome Annotation
 
+Trimmomatic 
+
 1. Raw reads from all 128 samples were mapped to both AGPv4 and the PS genome using STAR (v2.7.9a). Each execution produced a mapped file in bam format and unmapped reads were output also.
 
 1a. Merge unmapped reads from all 128 samples.
