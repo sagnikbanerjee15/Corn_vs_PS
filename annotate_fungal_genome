@@ -905,7 +905,6 @@ def main():
         cmd += f" --outSAMattributes NH HI AS nM NM MD jM jI XS "
         cmd += f" --outReadsUnmapped Fastx "
         cmd += f" --outFileNamePrefix {options.main_directory_spades_denovo_assembly}/merged_assembly/all_unmapped_reads_aligned_to_denovo_assembled_transcriptome_"
-        cmd += f" --readFilesCommand zcat "
         cmd += f" --readFilesIn {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_1.fastq {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_2.fastq "
         cmd += f" 1> {options.main_directory_outputs_and_errors}/all_unmapped_reads_aligned_to_denovo_assembled_transcriptome.output "
         cmd += f" 2> {options.main_directory_outputs_and_errors}/all_unmapped_reads_aligned_to_denovo_assembled_transcriptome.error "
