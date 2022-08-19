@@ -895,8 +895,8 @@ def main():
         cmd += f" --genomeDir {options.main_directory_star_index}"
         cmd += f" --outSAMtype BAM SortedByCoordinate "
         cmd += f" --outFilterMultimapNmax 100 "  
-        cmd += f" --alignIntronMin 20  "
-        cmd += f" --alignIntronMax 10000 "
+        cmd += f" --alignIntronMin 1  " # Aligning to transcriptome
+        cmd += f" --alignIntronMax 1 " # Aligning to transcriptome
         cmd += f" --limitBAMsortRAM 107374182400 "
         cmd += f" --alignEndsType Local " # ALLOWS soft clipping 
         cmd += f" --outSAMprimaryFlag AllBestScore "
