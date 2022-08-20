@@ -936,7 +936,7 @@ def main():
                               cpus = options.cpu, 
                               memory = '100g')
         
-        
+    if os.path.exists(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/all_unmapped_reads_aligned_to_denovo_assembled_transcriptome_bowtie2.bam") == False and os.path.exists(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/all_unmapped_reads_aligned_to_denovo_assembled_transcriptome_bowtie2.sam") == False:    
         cmd = f"bowtie2 "
         cmd += f" -x {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta "
         cmd += f" --threads {options.cpu} "
@@ -962,8 +962,10 @@ def main():
                               cpus = options.cpu, 
                               memory = '100g')
         
-        
-        cmd = f"samtools view -@ {options.cpu} -bS {options.main_directory_spades_denovo_assembly}/merged_assembly/all_unmapped_reads_aligned_to_denovo_assembled_transcriptome_bowtie2.sam|samtools sort -@ {options.cpu} > {options.output_directory}/alignments/{samplename}.bam"
+    
+    if os.path.exists(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/all_unmapped_reads_aligned_to_denovo_assembled_transcriptome_bowtie2.bam") == False:
+        cmd  = f"samtools view -@ {options.cpu} -bS {options.main_directory_spades_denovo_assembly}/merged_assembly/all_unmapped_reads_aligned_to_denovo_assembled_transcriptome_bowtie2.sam "
+        cmd += f"|samtools sort -@ {options.cpu} > {options.main_directory_spades_denovo_assembly}/merged_assembly/all_unmapped_reads_aligned_to_denovo_assembled_transcriptome_bowtie2.bam"
         
         software = "samtools"
         version = list_of_softwares_with_versions[software]
@@ -971,11 +973,11 @@ def main():
                               "bowtie2", 
                               version, 
                               image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
-                              container_name = "samtools_sort_by_name",
+                              container_name = "samtools_sort_by_position",
                               volumes = volumes_list,
                               command = cmd, 
                               cpus = options.cpu, 
-                              memory = '100g')
+                              memory = '300g')
     
     ################################################################################################################################################################################################################################################
     # Copy all output and errors to the temp directory
