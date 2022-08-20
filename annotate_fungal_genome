@@ -16,6 +16,7 @@ import glob
 import time
 import subprocess
 import math
+import re
 
 
 def parseCommandLineArguments():
@@ -978,6 +979,49 @@ def main():
                               command = cmd, 
                               cpus = options.cpu, 
                               memory = '300g')
+        
+        cmd  = f"samtools view -@ {options.cpu} {options.main_directory_spades_denovo_assembly}/merged_assembly/all_unmapped_reads_aligned_to_denovo_assembled_transcriptome_bowtie2.bam "
+        cmd += f" > {options.main_directory_spades_denovo_assembly}/merged_assembly/all_unmapped_reads_aligned_to_denovo_assembled_transcriptome_bowtie2_sorted.sam"
+        software = "samtools"
+        version = list_of_softwares_with_versions[software]
+        runSingularityCommand(logging, 
+                              "bowtie2", 
+                              version, 
+                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                              container_name = "samtools_sort_by_position",
+                              volumes = volumes_list,
+                              command = cmd, 
+                              cpus = options.cpu, 
+                              memory = '300g')
+        
+    # Count the number of reads mapped to each reference
+    
+    contigs_to_number_of_reads_mapped = {}
+    fhr = open(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/all_unmapped_reads_aligned_to_denovo_assembled_transcriptome_bowtie2_sorted.sam", "r")
+    fhw = open(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/all_unmapped_reads_aligned_to_denovo_assembled_transcriptome_bowtie2_num_reads_mapped_to_each_contig", "w")
+    for line in fhr:
+        if line[0] == "@": continue
+        line = line.strip().split("\t")
+        contig_name = line[2]
+        cigar = line[5]
+        cigar_split = re.findall(r'(\d+)([A-Z]{1})', cigar)
+        total_length = 0
+        length_of_match = 0
+        for pair in cigar_split:
+            if pair[1] == 'M':
+                total_length += int(pair[0])
+                length_of_match += int(pair[0])
+            elif pair[1] == 'I' or pair[1] == 'S' or pair[1] == 'H':
+                total_length += int(pair[0])
+        if contig_name not in contigs_to_number_of_reads_mapped:
+            contigs_to_number_of_reads_mapped[contig_name] = 0
+        contigs_to_number_of_reads_mapped[contig_name] += length_of_match/total_length 
+    fhr.close()
+    
+    for contig_name in contigs_to_number_of_reads_mapped:
+        fhw.write(f"{contig_name}:{contigs_to_number_of_reads_mapped[contig_name]}\n")
+        
+    fhw.close()
     
     ################################################################################################################################################################################################################################################
     # Copy all output and errors to the temp directory
