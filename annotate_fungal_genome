@@ -1023,7 +1023,8 @@ def main():
     fhr.close()
     
     for contig_name in contigs_to_number_of_reads_mapped:
-        fhw.write(f"{contig_name}\t{contigs_to_number_of_reads_mapped[contig_name]}\t{contigs_to_number_of_reads_mapped[contig_name]}/{int(contig_name.split('_')[3])}\n")
+        coverage = contigs_to_number_of_reads_mapped[contig_name]/int(contig_name.split('_')[3])
+        fhw.write(f"{contig_name}\t{contigs_to_number_of_reads_mapped[contig_name]}\t{coverage}\n")
     
     fhw.write(f"Number of unmapped reads: {number_of_unmapped_reads}")
     fhw.close()
