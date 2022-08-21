@@ -691,6 +691,29 @@ def main():
                                   command = cmd, 
                                   cpus = options.cpu, 
                                   memory = '300g')
+        
+        
+    if os.path.exists(f"{options.main_directory_psiclass_assembly_replicates_separate}/transcripts_blastx_to_nr") == False:
+        cmd  = f"blastx "
+        cmd += f" -query {options.main_directory_psiclass_assembly_replicates_separate}/psiclass_output_vote.fasta "
+        cmd += f" -out {options.main_directory_psiclass_assembly_replicates_separate}/transcripts_blastx_to_nr "
+        cmd += f" -db {options.main_directory_spades_denovo_assembly}/../ncbi_blast_run/nr/nr "
+        cmd += f" -outfmt '7 qseqid qlen sseqid slen evalue bitscore length pident qcovs ssciname scomname sskingdom staxids' "
+        cmd += f" -num_threads {options.cpu} "
+        cmd += f" 1> {options.main_directory_outputs_and_errors}/transcripts_blastx_to_nr_psiclass.output "
+        cmd += f" 2> {options.main_directory_outputs_and_errors}/transcripts_blastx_to_nr_psiclass.error "
+        
+        software = "ncbi_blast"
+        version = list_of_softwares_with_versions[software]
+        runSingularityCommand(logging, 
+                                  "ncbi_blast", 
+                                  version, 
+                                  image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                                  container_name = "ncbi_blast_NT",
+                                  volumes = volumes_list,
+                                  command = cmd, 
+                                  cpus = options.cpu, 
+                                  memory = '300g')
     
     
     # Merge replicates
@@ -830,6 +853,28 @@ def main():
                                   command = cmd, 
                                   cpus = options.cpu, 
                                   memory = '300g')
+        
+    if os.path.exists(f"{options.main_directory_stringtie_assembly}/transcripts_blastx_to_nr") == False:
+        cmd  = f"blastx "
+        cmd += f" -query {options.main_directory_stringtie_assembly}/all_samples_merged.fasta "
+        cmd += f" -out {options.main_directory_stringtie_assembly}/transcripts_blastx_to_nr "
+        cmd += f" -db {options.main_directory_spades_denovo_assembly}/../ncbi_blast_run/nr/nr "
+        cmd += f" -outfmt '7 qseqid qlen sseqid slen evalue bitscore length pident qcovs ssciname scomname sskingdom staxids' "
+        cmd += f" -num_threads {options.cpu} "
+        cmd += f" 1> {options.main_directory_outputs_and_errors}/transcripts_blastx_to_nr_stringtie.output "
+        cmd += f" 2> {options.main_directory_outputs_and_errors}/transcripts_blastx_to_nr_stringtie.error "
+        
+        software = "ncbi_blast"
+        version = list_of_softwares_with_versions[software]
+        runSingularityCommand(logging, 
+                                  "ncbi_blast", 
+                                  version, 
+                                  image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                                  container_name = "ncbi_blast_NT",
+                                  volumes = volumes_list,
+                                  command = cmd, 
+                                  cpus = options.cpu, 
+                                  memory = '300g')
     
     ################################################################################################################################################################################################################################################    
     # De novo assemble the unmapped reads
@@ -886,6 +931,28 @@ def main():
         cmd += f" -num_alignments 10 "
         cmd += f" 1> {options.main_directory_outputs_and_errors}/transcripts_blast_to_nt.output "
         cmd += f" 2> {options.main_directory_outputs_and_errors}/transcripts_blast_to_nt.error "
+        
+        software = "ncbi_blast"
+        version = list_of_softwares_with_versions[software]
+        runSingularityCommand(logging, 
+                                  "ncbi_blast", 
+                                  version, 
+                                  image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                                  container_name = "ncbi_blast_NT",
+                                  volumes = volumes_list,
+                                  command = cmd, 
+                                  cpus = options.cpu, 
+                                  memory = '300g')
+        
+    if os.path.exists(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts_blastx_to_nr") == False:
+        cmd  = f"blastx "
+        cmd += f" -query {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta "
+        cmd += f" -out {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts_blastx_to_nr "
+        cmd += f" -db {options.main_directory_spades_denovo_assembly}/../ncbi_blast_run/nr/nr "
+        cmd += f" -outfmt '7 qseqid qlen sseqid slen evalue bitscore length pident qcovs ssciname scomname sskingdom staxids' "
+        cmd += f" -num_threads {options.cpu} "
+        cmd += f" 1> {options.main_directory_outputs_and_errors}/transcripts_blastx_to_nr.output "
+        cmd += f" 2> {options.main_directory_outputs_and_errors}/transcripts_blastx_to_nr.error "
         
         software = "ncbi_blast"
         version = list_of_softwares_with_versions[software]
