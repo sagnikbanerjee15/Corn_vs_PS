@@ -645,7 +645,7 @@ def main():
         cmd  = f"gffread "
         cmd += f" {options.main_directory_psiclass_assembly_replicates_separate}/psiclass_output_vote.gtf "
         cmd += f" -g {options.reference} "
-        cmd += f"{options.main_directory_psiclass_assembly_replicates_separate}/psiclass_output_vote.fasta"
+        cmd += f" -w {options.main_directory_psiclass_assembly_replicates_separate}/psiclass_output_vote.fasta"
         
         software = "gffread"
         version = list_of_softwares_with_versions[software]
@@ -785,7 +785,7 @@ def main():
         cmd  = f"gffread "
         cmd += f" {options.main_directory_stringtie_assembly}/all_samples_merged.gtf "
         cmd += f" -g {options.reference} "
-        cmd += f"{options.main_directory_stringtie_assembly}/all_samples_merged.fasta"
+        cmd += f" -w {options.main_directory_stringtie_assembly}/all_samples_merged.fasta"
         
         software = "gffread"
         version = list_of_softwares_with_versions[software]
