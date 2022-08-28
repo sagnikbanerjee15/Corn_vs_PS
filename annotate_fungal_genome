@@ -190,7 +190,8 @@ def main():
                                        "cdhit":"4.8.1",
                                        "psiclass":"1.0.3",
                                        "stringtie":"2.2.1",
-                                       "ncbi_blast":"2.13.0"}
+                                       "ncbi_blast":"2.13.0",
+                                       "gffcompare":"0.12.6"}
 
     volumes_list = [f"{options.output_directory}:{options.output_directory}",
                     f"{options.temp_directory}:{options.temp_directory}",
@@ -669,53 +670,6 @@ def main():
     # BLAST all the psiclass transcripts generated
     ################################################################################################################################################################################################################################################
     
-    if os.path.exists(f"{options.main_directory_psiclass_assembly_replicates_separate}/transcripts_blast_to_nt") == False:
-        cmd  = f"blastn "
-        cmd += f" -query {options.main_directory_psiclass_assembly_replicates_separate}/psiclass_output_vote.fasta "
-        cmd += f" -out {options.main_directory_psiclass_assembly_replicates_separate}/transcripts_blast_to_nt "
-        cmd += f" -db {options.main_directory_spades_denovo_assembly}/../ncbi_blast_run/nt/nt "
-        cmd += f" -outfmt '7 qseqid qlen sseqid slen evalue bitscore length pident qcovs ssciname scomname sskingdom staxids' "
-        cmd += f" -num_threads {options.cpu} "
-        cmd += f" -num_alignments 10 "
-        cmd += f" 1> {options.main_directory_outputs_and_errors}/transcripts_blast_to_nt_psiclass.output "
-        cmd += f" 2> {options.main_directory_outputs_and_errors}/transcripts_blast_to_nt_psiclass.error "
-        
-        software = "ncbi_blast"
-        version = list_of_softwares_with_versions[software]
-        runSingularityCommand(logging, 
-                                  "ncbi_blast", 
-                                  version, 
-                                  image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
-                                  container_name = "ncbi_blast_NT",
-                                  volumes = volumes_list,
-                                  command = cmd, 
-                                  cpus = options.cpu, 
-                                  memory = '300g')
-        
-        
-    if os.path.exists(f"{options.main_directory_psiclass_assembly_replicates_separate}/transcripts_blastx_to_nr") == False:
-        cmd  = f"blastx "
-        cmd += f" -query {options.main_directory_psiclass_assembly_replicates_separate}/psiclass_output_vote.fasta "
-        cmd += f" -out {options.main_directory_psiclass_assembly_replicates_separate}/transcripts_blastx_to_nr "
-        cmd += f" -db {options.main_directory_spades_denovo_assembly}/../ncbi_blast_run/nr/nr "
-        cmd += f" -outfmt '7 qseqid qlen sseqid slen evalue bitscore length pident qcovs ssciname scomname sskingdom staxids' "
-        cmd += f" -num_threads {options.cpu} "
-        cmd += f" 1> {options.main_directory_outputs_and_errors}/transcripts_blastx_to_nr_psiclass.output "
-        cmd += f" 2> {options.main_directory_outputs_and_errors}/transcripts_blastx_to_nr_psiclass.error "
-        
-        software = "ncbi_blast"
-        version = list_of_softwares_with_versions[software]
-        runSingularityCommand(logging, 
-                                  "ncbi_blast", 
-                                  version, 
-                                  image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
-                                  container_name = "ncbi_blast_NT",
-                                  volumes = volumes_list,
-                                  command = cmd, 
-                                  cpus = options.cpu, 
-                                  memory = '300g')
-    
-    
     # Merge replicates
     replicates_group = {}
     for row in options.metadata:
@@ -827,20 +781,68 @@ def main():
             cmd = f"cp {options.main_directory_stringtie_assembly}/all_samples_merged.fasta {options.temp_directory_stringtie_assembly}/"
             os.system(cmd)
             
+    
+    ################################################################################################################################################################################################################################################    
+    # Merge psiclass and StringTie transcripts together
     ################################################################################################################################################################################################################################################
-    # BLAST all the stringtie transcripts generated
+    cmd  = f" gffcompare "
+    cmd += f" -r {options.main_directory_stringtie_assembly}/all_samples_merged.gtf "
+    cmd += f" -o {options.output_directory}/psiclass_stringtie_merged "
+    cmd += f" {options.main_directory_stringtie_assembly}/all_samples_merged.gtf "
+    cmd += f" {options.main_directory_psiclass_assembly_replicates_separate}/psiclass_output_vote.gtf"
+    
+    if os.path.exists(f"{options.output_directory}/psiclass_stringtie_merged.combined.gtf") == False:
+        software = "gffcompare"
+        version = list_of_softwares_with_versions[software]
+        runSingularityCommand(logging, 
+                                  "spades", 
+                                  version, 
+                                  image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                                  container_name = "spades_assembly",
+                                  volumes = volumes_list,
+                                  command = cmd, 
+                                  cpus = options.cpu, 
+                                  memory = '1500g')
+        
+    if os.path.exists(f"{options.output_directory}/psiclass_stringtie_merged.combined.fasta") == False:     
+        cmd  = f"gffread "
+        cmd += f" {options.output_directory}/psiclass_stringtie_merged.combined.gtf "
+        cmd += f" -g {options.reference} "
+        cmd += f" -w {options.output_directory}/psiclass_stringtie_merged.combined.fasta "
+        
+        software = "gffread"
+        version = list_of_softwares_with_versions[software]
+        
+        runSingularityCommand(logging, 
+                          "stringtie_assembly", 
+                          version, 
+                          image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
+                          container_name = "gffread_convert_to_fasta", 
+                          volumes = volumes_list,
+                          command = cmd, 
+                          cpus = options.cpu, 
+                          memory = f'{options.memory}g')
+        
+        if options.transfer:
+            cmd = f"cp {options.main_directory_stringtie_assembly}/all_samples_merged.fasta {options.temp_directory_stringtie_assembly}/"
+            os.system(cmd)
+            
+            
+    """
+    ################################################################################################################################################################################################################################################
+    # BLAST all the merged transcripts generated
     ################################################################################################################################################################################################################################################
     
-    if os.path.exists(f"{options.main_directory_stringtie_assembly}/transcripts_blast_to_nt") == False:
+    if os.path.exists(f"{options.output_directory}/psiclass_stringtie_merged.transcripts_blast_to_nt") == False:
         cmd  = f"blastn "
-        cmd += f" -query {options.main_directory_stringtie_assembly}/all_samples_merged.fasta "
-        cmd += f" -out {options.main_directory_stringtie_assembly}/transcripts_blast_to_nt "
+        cmd += f" -query {options.output_directory}/psiclass_stringtie_merged.combined.fasta "
+        cmd += f" -out {options.output_directory}/psiclass_stringtie_merged.transcripts_blast_to_nt "
         cmd += f" -db {options.main_directory_spades_denovo_assembly}/../ncbi_blast_run/nt/nt "
         cmd += f" -outfmt '7 qseqid qlen sseqid slen evalue bitscore length pident qcovs ssciname scomname sskingdom staxids' "
         cmd += f" -num_threads {options.cpu} "
         cmd += f" -num_alignments 10 "
-        cmd += f" 1> {options.main_directory_outputs_and_errors}/transcripts_blast_to_nt_stringtie.output "
-        cmd += f" 2> {options.main_directory_outputs_and_errors}/transcripts_blast_to_nt_stringtie.error "
+        cmd += f" 1> {options.main_directory_outputs_and_errors}/psiclass_stringtie_merged.transcripts_blast_to_nt.output "
+        cmd += f" 2> {options.main_directory_outputs_and_errors}/psiclass_stringtie_merged.transcripts_blast_to_nt.error "
         
         software = "ncbi_blast"
         version = list_of_softwares_with_versions[software]
@@ -853,16 +855,16 @@ def main():
                                   command = cmd, 
                                   cpus = options.cpu, 
                                   memory = '300g')
-        
-    if os.path.exists(f"{options.main_directory_stringtie_assembly}/transcripts_blastx_to_nr") == False:
+      
+    if os.path.exists(f"{options.output_directory}/psiclass_stringtie_merged.transcripts_blastx_to_nr") == False:
         cmd  = f"blastx "
-        cmd += f" -query {options.main_directory_stringtie_assembly}/all_samples_merged.fasta "
-        cmd += f" -out {options.main_directory_stringtie_assembly}/transcripts_blastx_to_nr "
+        cmd += f" -query {options.output_directory}/psiclass_stringtie_merged.combined.fasta "
+        cmd += f" -out {options.output_directory}/psiclass_stringtie_merged.transcripts_blastx_to_nr "
         cmd += f" -db {options.main_directory_spades_denovo_assembly}/../ncbi_blast_run/nr/nr "
         cmd += f" -outfmt '7 qseqid qlen sseqid slen evalue bitscore length pident qcovs ssciname scomname sskingdom staxids' "
         cmd += f" -num_threads {options.cpu} "
-        cmd += f" 1> {options.main_directory_outputs_and_errors}/transcripts_blastx_to_nr_stringtie.output "
-        cmd += f" 2> {options.main_directory_outputs_and_errors}/transcripts_blastx_to_nr_stringtie.error "
+        cmd += f" 1> {options.main_directory_outputs_and_errors}/psiclass_stringtie_merged.transcripts_blastx_to_nr.output "
+        cmd += f" 2> {options.main_directory_outputs_and_errors}/psiclass_stringtie_merged.transcripts_blastx_to_nr.error "
         
         software = "ncbi_blast"
         version = list_of_softwares_with_versions[software]
@@ -870,12 +872,13 @@ def main():
                                   "ncbi_blast", 
                                   version, 
                                   image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
-                                  container_name = "ncbi_blast_NT",
+                                  container_name = "ncbi_blast_NR",
                                   volumes = volumes_list,
                                   command = cmd, 
                                   cpus = options.cpu, 
                                   memory = '300g')
-    
+    """
+
     ################################################################################################################################################################################################################################################    
     # De novo assemble the unmapped reads
     ################################################################################################################################################################################################################################################
@@ -943,7 +946,7 @@ def main():
                                   command = cmd, 
                                   cpus = options.cpu, 
                                   memory = '300g')
-        
+    """    
     if os.path.exists(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts_blastx_to_nr") == False:
         cmd  = f"blastx "
         cmd += f" -query {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta "
@@ -965,7 +968,7 @@ def main():
                                   command = cmd, 
                                   cpus = options.cpu, 
                                   memory = '300g')
-        
+    """    
     ################################################################################################################################################################################################################################################
     # Select transcripts that have an ORF of least 50 aa
     ################################################################################################################################################################################################################################################
@@ -994,7 +997,7 @@ def main():
         for seq_id in selected_all_spades_assembled_transcripts:
             fhw.write(f">{seq_id}\n{selected_all_spades_assembled_transcripts[seq_id]}\n")
         fhw.close()
-        
+    """    
     ################################################################################################################################################################################################################################################
     # Generate CDHIT clusters - Round 1 
     ################################################################################################################################################################################################################################################
@@ -1022,6 +1025,7 @@ def main():
                                   cpus = options.cpu, 
                                   memory = f'{options.memory}g')
             logging.info(f"CDHIT execution completed for cluster threshold {cluster_similarity} round 1")
+    """
             
     ################################################################################################################################################################################################################################################
     # Remap unmapped reads to the entire de novo assembled transcriptome
@@ -1058,38 +1062,6 @@ def main():
                               memory = f'{options.memory}g')
         logging.info(f"STAR genome generated for de novo assembled transcripts")
         
-    if os.path.exists(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/all_unmapped_reads_aligned_to_denovo_assembled_transcriptome_Aligned.sortedByCoord.out.bam") == False:
-        cmd  = f"STAR "
-        cmd += f" --runThreadN {options.cpu} "
-        cmd += f" --outBAMsortingThreadN {options.cpu}"
-        cmd += f" --genomeDir {options.main_directory_star_index}"
-        cmd += f" --outSAMtype BAM SortedByCoordinate "
-        cmd += f" --outFilterMultimapNmax 100 "  
-        cmd += f" --alignIntronMin 1  " # Aligning to transcriptome
-        cmd += f" --alignIntronMax 1 " # Aligning to transcriptome
-        cmd += f" --limitBAMsortRAM 107374182400 "
-        cmd += f" --alignEndsType Local " # ALLOWS soft clipping 
-        cmd += f" --outSAMprimaryFlag AllBestScore "
-        cmd += f" --outFilterScoreMinOverLread 0.7"
-        cmd += f" --outFilterMatchNminOverLread 0.7 "
-        cmd += f" --outSAMattributes NH HI AS nM NM MD jM jI XS "
-        cmd += f" --outReadsUnmapped Fastx "
-        cmd += f" --outFileNamePrefix {options.main_directory_spades_denovo_assembly}/merged_assembly/all_unmapped_reads_aligned_to_denovo_assembled_transcriptome_"
-        cmd += f" --readFilesIn {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_1.fastq {options.main_directory_spades_denovo_assembly}/all_unmapped_reads_2.fastq "
-        cmd += f" 1> {options.main_directory_outputs_and_errors}/all_unmapped_reads_aligned_to_denovo_assembled_transcriptome.output "
-        cmd += f" 2> {options.main_directory_outputs_and_errors}/all_unmapped_reads_aligned_to_denovo_assembled_transcriptome.error "
-        
-        software = "star"
-        version = list_of_softwares_with_versions[software]
-        runSingularityCommand(logging, 
-                              "STAR", 
-                              version, 
-                              image_location = f"{options.output_directory}/singularity_images/{software}:{version}", 
-                              container_name = f"star_alignment_{samplename}",
-                              volumes = volumes_list,
-                              command = cmd, 
-                              cpus = options.cpu, 
-                              memory = f'{options.memory}g')
         
     if os.path.exists(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta.1.bt2") == False:
         cmd = f"bowtie2-build --threads {options.cpu} {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta {options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta"
@@ -1204,6 +1176,33 @@ def main():
     if options.transfer:
         cmd = f"cp -r {options.main_directory_outputs_and_errors} {options.temp_directory_outputs_and_errors}/.."
         os.system(cmd)
+        
+    high_coverage_denovo_transcripts = []
+    fhr = open(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/all_unmapped_reads_aligned_to_denovo_assembled_transcriptome_bowtie2_num_reads_mapped_to_each_contig","r")
+    for line in fhr:
+        line = line.strip().split("\t")
+        if len(line) == 3:
+            if float(line[3]) >= 1:
+                high_coverage_denovo_transcripts.append(line[0])
+    fhr.close()
+    high_coverage_denovo_transcripts=set(high_coverage_denovo_transcripts)
+    
+    min_50_aa_denovo_transcripts = []
+    fhr = open(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts_larger_than_50_aa.fasta","r")
+    for line in fhr:
+        if line[0] == ">":
+            min_50_aa_denovo_transcripts.append(line.strip()[1:])
+    fhr.close()
+    
+    
+    fhr = open(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts.fasta","r")
+    fhw = open(f"{options.main_directory_spades_denovo_assembly}/merged_assembly/transcripts_high_coverage_min_50_aa.fasta","w")
+    for line in fhr:
+        if line[0]==">":
+            if line.strip()[1:] in high_coverage_denovo_transcripts and line.strip()[1:] in min_50_aa_denovo_transcripts:
+                fhw.write(line + fhr.readline())
+    fhw.close()
+    fhr.close()
     
     
 if __name__ == "__main__":

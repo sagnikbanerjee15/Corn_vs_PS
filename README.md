@@ -110,7 +110,7 @@ Trimmomatic
 
 1a. Merge unmapped reads from all 128 samples.
 
-2. Unmapped reads were assembled denovo using spades (v3.15.4) with kmer length set to 101. No other de novo assemblers were explored to reduce complexity. Final assembled transcripts are in /90daydata/maizegdb/sagnik/CORN_VS_PS/PS_SALSA_annotation/denovo_assembly/all_unmapped_merged. We chose to move forward with the hard_filtered_transcripts.fasta	
+2. Unmapped reads were assembled denovo using spades (v3.15.4) with kmer length set to 101. No other de novo assemblers were explored to reduce complexity. Final assembled transcripts are in /90daydata/maizegdb/sagnik/CORN_VS_PS/PS_SALSA_annotation/denovo_assembly/all_unmapped_merged.
 
 3. [Previous approach] De novo assembled sequences from all 128 samples were merged together. De novo assembly from each sample generated about 25K transcripts. CD-HIT (v4.8.1) was used to cluster them at a threshold of 0.8. Rerun CHIT again only on the representative clusters but now with local alignment. Also look at coverage.
 
@@ -118,6 +118,6 @@ Trimmomatic
 
 5. Generate genome guided assembly using PsiCLASS and also with Stringtie2
 
-6. 
+6. Merge the 2 sources of ene annotations - nohup gffcompare  -r psiclass_assembly_replicates_separate/psiclass_output_vote.gtf -o psiclass_stringtie_merged stringtie_assembly/all_samples_merged.gtf psiclass_assembly_replicates_separate/psiclass_output_vote.gtf &
 
 
