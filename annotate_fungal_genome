@@ -822,10 +822,6 @@ def main():
                           command = cmd, 
                           cpus = options.cpu, 
                           memory = f'{options.memory}g')
-        
-        if options.transfer:
-            cmd = f"cp {options.main_directory_stringtie_assembly}/all_samples_merged.fasta {options.temp_directory_stringtie_assembly}/"
-            os.system(cmd)
             
             
     """
@@ -1182,7 +1178,7 @@ def main():
     for line in fhr:
         line = line.strip().split("\t")
         if len(line) == 3:
-            if float(line[3]) >= 1:
+            if float(line[2]) >= 1:
                 high_coverage_denovo_transcripts.append(line[0])
     fhr.close()
     high_coverage_denovo_transcripts=set(high_coverage_denovo_transcripts)
