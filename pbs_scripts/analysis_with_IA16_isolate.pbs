@@ -17,9 +17,13 @@
 
 module load singularity
 
+
+
 ROOT_DIR="/project/maizegdb/sagnik/CORN_VS_PS/"
 TEMP_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS/analysis_with_IA16_isolate"
 REF_DIR="/project/maizegdb/sagnik/CORN_VS_PS/data/PS_SALSA_annotation/final_annotation/"
+
+export SINGULARITY_CACHEDIR=${ROOT_DIR}/data/analysis_with_IA16_isolate/singularity_images
 
 ${ROOT_DIR}/Corn_vs_PS/find_differentially_expressed_genes \
 --transfer \
