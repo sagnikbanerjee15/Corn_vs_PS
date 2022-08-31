@@ -98,7 +98,7 @@ Verification was perfomed by mapping RNA-Seq data (samples 113-122) from S2 and 
 
 # Workflow
 
-1. Execute the program `mergeDataFromTwoLanesAndRenameRawFiles` to merge data from 2 lanes. Please note that this program will work only for this project. The program assumes that the same sample will have the same name in both the lanes and that the sampoles are paired ended. It uses the filenames to merge them. Then it will rename the file to something short. Please note that the renaming convention was chosen to be meaningful for this project only. Please review the code and make meaningful changes to it if you wish to reuse it for other projects. DO NOT execute as is.
+1. Execute the program `mergeDataFromTwoLanesAndRenameRawFiles` to merge data from 2 lanes. Please note that this program will work only for this project. The program assumes that the same sample will have the same name in both the lanes and that the samples are paired ended. It uses the filenames to merge them. Then it will rename the file to something short. Please note that the renaming convention was chosen to be meaningful for this project only. Please review the code and make meaningful changes to it if you wish to reuse it for other projects. DO NOT execute as is.
 
 2. The reference consisted of transcripts from B73 and Argentina PS isolate. Short reads were aligned to the merged reference using bowtie2 and salmon was used to estimate gene counts. Custom script was written up to accumulate the gene counts from salmon output. DESeq2 will be used to determine the genes that are differentially expressed. No trimmining of reads was performed
 
@@ -135,6 +135,7 @@ Transcripts were retained if they had a coverage of at least 1 and had an amino 
 
 Extract read alignments that map to the PS genome using samtools and custom python script.
 Generate genome guided assembly using PsiCLASS and also with Stringtie2
-Merged annotations from PsiCLASS and Stringtie2 ((13043 genes and 32836 transcripts)
+Merged annotations from PsiCLASS and Stringtie2 (13043 genes and 32836 transcripts) using gffcompare
+These are all PS IA16 genes and transcripts
 
 

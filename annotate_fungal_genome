@@ -824,7 +824,7 @@ def main():
                           memory = f'{options.memory}g')
             
             
-    """
+    
     ################################################################################################################################################################################################################################################
     # BLAST all the merged transcripts generated
     ################################################################################################################################################################################################################################################
@@ -834,7 +834,7 @@ def main():
         cmd += f" -query {options.output_directory}/psiclass_stringtie_merged.combined.fasta "
         cmd += f" -out {options.output_directory}/psiclass_stringtie_merged.transcripts_blast_to_nt "
         cmd += f" -db {options.main_directory_spades_denovo_assembly}/../ncbi_blast_run/nt/nt "
-        cmd += f" -outfmt '7 qseqid qlen sseqid slen evalue bitscore length pident qcovs ssciname scomname sskingdom staxids' "
+        cmd += f" -outfmt '7 qseqid sseqid stitle length pident qcovs evalue qlen qseq slen sseq mismatch gapopen qstart qend sstart send bitscore staxids' "
         cmd += f" -num_threads {options.cpu} "
         cmd += f" -num_alignments 10 "
         cmd += f" 1> {options.main_directory_outputs_and_errors}/psiclass_stringtie_merged.transcripts_blast_to_nt.output "
@@ -851,7 +851,7 @@ def main():
                                   command = cmd, 
                                   cpus = options.cpu, 
                                   memory = '300g')
-      
+    """
     if os.path.exists(f"{options.output_directory}/psiclass_stringtie_merged.transcripts_blastx_to_nr") == False:
         cmd  = f"blastx "
         cmd += f" -query {options.output_directory}/psiclass_stringtie_merged.combined.fasta "
