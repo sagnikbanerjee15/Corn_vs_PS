@@ -129,7 +129,7 @@ Spades includes the gene number and isoform number in the name of the assembled 
 
 Trimmed short reads from all 128 samples were remapped to the de novo assembly using bowtie2 version 0.7.17 (123,792 transripts)
 Number of reads mapping to each de novo assembled transcript was calculated and normalized over the length of the transcript, generating the coverage.
-Transcripts were retained if they had a coverage of at least 1 and had an amino acid of at least 50 peptides in one of the 6 ORFs. (37,811) [Only 37,967 transcripts had a coverage > 1]
+Transcripts were retained if they had a coverage of at least 1 and had an amino acid of at least 50 peptides in one of the 6 ORFs. (27098 gene and 37,811 transcripts) [Out of 123K transcripts, only 37,967 transcripts had a coverage > 1]
 
 ## Genome guided assembly
 
@@ -137,5 +137,10 @@ Extract read alignments that map to the PS genome using samtools and custom pyth
 Generate genome guided assembly using PsiCLASS and also with Stringtie2
 Merged annotations from PsiCLASS and Stringtie2 (13043 genes and 32836 transcripts) using gffcompare
 These are all PS IA16 genes and transcripts
+
+## Counts generation (Salmon)
+
+Transcripts from PS_IA16 and B73v4 were merged together (106384 genes and 228888 transcripts)
+Read counts were generated using salmon
 
 
