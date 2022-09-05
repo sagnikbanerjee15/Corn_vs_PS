@@ -586,7 +586,7 @@ def main():
     # Copy all fungal bam files to output directory
     for row in options.metadata:
         samplename, ended, cultivar, condition, timepoint, biological_replicate, location = row
-        if os.path.exists(f"{options.main_directory_alignments_to_fungal_reference}/{samplename}_Aligned.sortedByCoord.out.bam") == False:
+        if os.path.exists(f"{options.main_directory_alignments_to_fungal_reference}/{samplename}_Aligned.sortedByCoord.out.bam") == False and os.path.exists(f"{options.main_directory_stringtie_assembly}/all_samples_merged.bam") == False and os.path.exists(f"{options.main_directory_psiclass_assembly_replicates_separate}/psiclass_output_vote.gtf") == False:
             cmd = f"cp {options.temp_directory_alignments_to_fungal_reference}/{samplename}_Aligned.sortedByCoord.out.bam {options.main_directory_alignments_to_fungal_reference}"
             os.system(cmd)
             
