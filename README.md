@@ -106,41 +106,42 @@ Verification was perfomed by mapping RNA-Seq data (samples 113-122) from S2 and 
 
 ## Adapter trimming
 
-Trim adapters using Trimmomatic. No quality trimming was performed. Trimmomatic was executed with a clipping parameter of 2:30:10, that prompted Trimmomatic to allow for 2 mismatches. In case of paired end reads, trimmomatic will look for a score of 30, which is about 50 bases.
+* Trim adapters using Trimmomatic. No quality trimming was performed. 
+* Trimmomatic was executed with a clipping parameter of 2:30:10, that prompted Trimmomatic to allow for 2 mismatches. In case of paired end reads, trimmomatic will look for a score of 30, which is about 50 bases.
 
 ## Preparation of Reference 
 
-Genomic reference for Zea mays version 4 was used (AGPv4 B73)
-Fungal reference genome was assembled using nanopore reads (ref reqd.)
+* Genomic reference for Zea mays version 4 was used (AGPv4 B73)
+* Fungal reference genome was assembled using nanopore reads (ref reqd.)
 
 ## Alignment to reference
 
-STAR version 2.7.9a 
-Both genomic references were merged. 
-Adapter trimmed reads from all 128 samples were mapped. Each execution produced a mapped file in bam format and unmapped reads were output also.
+* STAR version 2.7.9a 
+* Both genomic references were merged. 
+* Adapter trimmed reads from all 128 samples were mapped. Each execution produced a mapped file in bam format and unmapped reads were output also.
 
 ## De novo assembly
 
-Spades version 3.15.4 was used with kmer length set to 101. 
-Unmapped reads from all 128 samples were merged together. No other de novo assemblers were explored to reduce complexity. Final assembled transcripts are in /90daydata/maizegdb/sagnik/CORN_VS_PS/PS_SALSA_annotation/denovo_assembly/all_unmapped_merged/.
-Spades includes the gene number and isoform number in the name of the assembled transcript, which were later used to map transcript to genes
+* Spades version 3.15.4 was used with kmer length set to 101. 
+* Unmapped reads from all 128 samples were merged together. No other de novo assemblers were explored to reduce complexity. Final assembled transcripts are in /90daydata/maizegdb/sagnik/CORN_VS_PS/PS_SALSA_annotation/denovo_assembly/all_unmapped_merged/.
+* Spades includes the gene number and isoform number in the name of the assembled transcript, which were later used to map transcript to genes
 
 ## Verification of de novo assembled transcripts
 
-Trimmed short reads from all 128 samples were remapped to the de novo assembly using bowtie2 version 0.7.17 (123,792 transripts)
-Number of reads mapping to each de novo assembled transcript was calculated and normalized over the length of the transcript, generating the coverage.
-Transcripts were retained if they had a coverage of at least 1 and had an amino acid of at least 50 peptides in one of the 6 ORFs. (27098 gene and 37,811 transcripts) [Out of 123K transcripts, only 37,967 transcripts had a coverage > 1]
+* Trimmed short reads from all 128 samples were remapped to the de novo assembly using bowtie2 version 0.7.17 (123,792 transripts)
+* Number of reads mapping to each de novo assembled transcript was calculated and normalized over the length of the transcript, generating the coverage.
+* Transcripts were retained if they had a coverage of at least 1 and had an amino acid of at least 50 peptides in one of the 6 ORFs. (27098 gene and 37,811 transcripts) [Out of 123K transcripts, only 37,967 transcripts had a coverage > 1]
 
 ## Genome guided assembly
 
-Extract read alignments that map to the PS genome using samtools and custom python script.
-Generate genome guided assembly using PsiCLASS and also with Stringtie2
-Merged annotations from PsiCLASS and Stringtie2 (13043 genes and 32836 transcripts) using gffcompare
-These are all PS IA16 genes and transcripts
+* Extract read alignments that map to the PS genome using samtools and custom python script.
+* Generate genome guided assembly using PsiCLASS and also with Stringtie2
+* Merged annotations from PsiCLASS and Stringtie2 (13043 genes and 32836 transcripts) using gffcompare
+* These are all PS IA16 genes and transcripts
 
 ## Counts generation (Salmon)
 
-Transcripts from PS_IA16 and B73v4 were merged together (106384 genes and 228888 transcripts)
-Read counts were generated using salmon
+* Transcripts from PS_IA16 and B73v4 were merged together (106384 genes and 228888 transcripts)
+* Read counts were generated using salmon
 
 
