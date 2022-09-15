@@ -17,11 +17,9 @@
 
 module load singularity
 
-
-
 ROOT_DIR="/project/maizegdb/sagnik/CORN_VS_PS/"
 TEMP_DIR="/90daydata/maizegdb/sagnik/CORN_VS_PS/analysis_with_IA16_isolate"
-REF_DIR="/project/maizegdb/sagnik/CORN_VS_PS/data/B73_IA16_reference"
+REF_DIR="/project/maizegdb/sagnik/CORN_VS_PS/data/references/transcriptome/combined"
 
 export SINGULARITY_CACHEDIR=${ROOT_DIR}/data/analysis_with_IA16_isolate/singularity_images
 
@@ -32,7 +30,7 @@ ${ROOT_DIR}/Corn_vs_PS/find_differentially_expressed_genes \
 --temp_directory ${TEMP_DIR} \
 --framework singularity \
 --cpu 72 \
---reference ${REF_DIR}/B73_IA16_gg_nd_merged.fasta \
---gene_to_transcript_map ${REF_DIR}/transcript_to_gene_map \
+--reference ${REF_DIR}/transcripts_zea_mays_PS.fasta \
+--gene_to_transcript_map ${REF_DIR}/transcript_to_gene_map_zea_mays_PS \
 1> ${ROOT_DIR}/data/analysis_with_IA16_isolate.output \
 2> ${ROOT_DIR}/data/analysis_with_IA16_isolate.error
