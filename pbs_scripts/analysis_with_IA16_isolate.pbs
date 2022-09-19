@@ -25,7 +25,7 @@ export SINGULARITY_CACHEDIR=${ROOT_DIR}/data/analysis_with_IA16_isolate/singular
 
 ${ROOT_DIR}/Corn_vs_PS/find_differentially_expressed_genes \
 --transfer \
---metadatafilename ${ROOT_DIR}/Corn_vs_PS/metadata.csv \
+--metadatafilename ${ROOT_DIR}/Corn_vs_PS/metadata-till122.csv \
 --output_directory ${ROOT_DIR}/data/analysis_with_IA16_isolate \
 --temp_directory ${TEMP_DIR} \
 --framework singularity \
