@@ -17,7 +17,7 @@ Paired ended (150+150) - S2 (NovaSeq 6000) - Sequenced on 2 lanes (technical rep
 Number of replicates - 4
 Number of timepoints - 7
 Number of genotypes - 2 (Susceptible & Resistance)
-Number of treatmets - 2 
+Number of treatments - 2 
 
 Total number of samples = 4 * 7 * 2 * 2 = 112 (RNASeq id 1 - 112)
 

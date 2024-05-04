@@ -1,0 +1,329 @@
+#! /usr/bin/env python3
+
+from argparse import RawTextHelpFormatter
+from pprint import pformat
+
+import argparse
+import logging
+import os
+import pprint
+import sys
+import re
+import time
+import multiprocessing
+import random
+import glob
+import time
+import subprocess
+import math
+import re
+import pandas as pd
+
+def parseCommandLineArguments():
+    parser = argparse.ArgumentParser( prog = "align_and_generate_counts", description = "Perform analysis to align raw RNA-Seq data to transcriptome and generate counts", formatter_class = RawTextHelpFormatter )
+    required_named = parser.add_argument_group( 'Required arguments' )
+    optional_named = parser.add_argument_group( 'Optional arguments' )
+
+    ##################################################################################################
+    # Required arguments
+    ##################################################################################################
+    required_named.add_argument( "--metadatafilename", help = "Enter the metadata file. The file format should be SampleName,Ended,Cultivar,Condition,Timepoints,Replicate,Left_pair_location,Right_pair_location. Please check metadata_for_counts.csv file", required = True )
+    required_named.add_argument( "--output_directory", help = "Enter the name of the output directory. all analysis will be stored here. Please make sure you have sufficient space on your disk to reproduce all the analysis", required = True )
+    required_named.add_argument( "--host_reference", help = "Enter the name of the host genome file in fasta format", required = True)
+    required_named.add_argument( "--host_transcriptome_gff3", help = "Enter the name of the transcriptome file in gff3 format", required = True)
+    required_named.add_argument( "--fungal_reference", help = "Enter the name of the fungal genome file in fasta format", required = True)
+    required_named.add_argument( "--fungal_transcriptome_gff3", help = "Enter the name of the fungal transcriptome file in gff3 format", required = True)
+    required_named.add_argument( "--logfilename", help = "Enter the name of the logfile", required = True) )
+    #required_named.add_argument( "--gene_to_transcript_map", "--gene_to_transcript_map", help = "Enter the gene to transcript mapping", required = True)
+
+    ##################################################################################################
+    # Optional arguments
+    ##################################################################################################
+    optional_named.add_argument( "--cpu", help = "Enter the number of CPUs. Please note that all alignments will be conducted using a single CPU. This argument will control how many parallel alignments can be launched", default = 1 )
+    
+
+    ##################################################################################################
+    # Suppressed arguments
+    ##################################################################################################
+    parser.add_argument( "--metadata_expanded", "-metadata_expanded", help = argparse.SUPPRESS )
+
+    return parser.parse_args()
+
+def calculate_genome_length(fasta_file):
+    length = 0
+    with open(fasta_file, "r") as file:
+        for line in file:
+            if not line.startswith(">"):
+                length += len(line.strip())
+    return length
+
+def calculate_number_of_sequences(fasta_file):
+    count = 0
+    with open(fasta_file, "r") as file:
+        for line in file:
+            if line.startswith(">"):
+                count += 1
+    return count
+
+def calculate_genomeSAindexNbases(genome_length):
+    # Calculate the value of genomeSAindexNbases
+    genomeSAindexNbases = math.min(14, int(math.log2(genome_length) * 2 - 1))
+    return genomeSAindexNbases
+
+def calculate_genomeChrBinNbits(genome_length):
+    # Calculate the value of genomeChrBinNbits
+    genomeChrBinNbits = math.min(18,math.log2(genome_length/total_number_of_host_and_fungal_transcripts))
+    return genomeChrBinNbits
+
+def main():
+    options = parseCommandLineArguments()
+
+    # Set up logging
+    logging.basicConfig( filename = options.logfilename, level = logging.DEBUG, format = '%(asctime)s %(message)s' )
+
+    ##################################################################################################################################################################``
+    # Create the output directory structure
+    ##################################################################################################################################################################
+    create_these_directories = []
+
+    options.star_index_directory = os.path.join( options.output_directory, "star_index" )
+    options.star_alignment_directory = os.path.join( options.output_directory, "star_alignment" )
+    options.transcriptome_directory = os.path.join( options.output_directory, "transcriptome" )
+    options.salmon_counts_directory = os.path.join( options.output_directory, "salmon_counts" )
+    options.temp_directory = os.path.join( options.output_directory, "temp" )
+    
+    create_these_directories.append( options.star_index_directory )
+    create_these_directories.append( options.star_alignment_directory )
+    create_these_directories.append( options.transcriptome_directory )
+    create_these_directories.append( options.salmon_counts_directory )
+    create_these_directories.append( options.temp_directory )
+
+    for directory in create_these_directories:
+        if not os.path.exists( directory ):
+            os.makedirs( directory )
+
+    logging.info( "Output directory structure created" )
+    ##################################################################################################################################################################
+
+    ##################################################################################################################################################################
+    # Read the metadata file
+    ##################################################################################################################################################################
+    metadata = {}
+    options.metadata_expanded = {}
+    fhr = open( options.metadatafilename, "r" )
+    for line in fhr:
+        if "location_of_left_pair" in line: continue
+        cultivar, condition, timepoints, biological_replicate, technical_replicate, location_of_left_pair, location_of_right_pair = line.strip().split( "," )
+        if cultivar not in metadata:
+            metadata[cultivar] = {}
+        if condition not in metadata[cultivar]:
+            metadata[cultivar][condition] = {}
+        if timepoints not in metadata[cultivar][condition]:
+            metadata[cultivar][condition][timepoints] = {}
+        if f"biorep_{biological_replicate}" not in metadata[cultivar][condition][timepoints]:
+            metadata[cultivar][condition][timepoints][f"biorep_{biological_replicate}"] = {}
+        if f"techrep_{technical_replicate}" not in metadata[cultivar][condition][timepoints][f"biorep_{biological_replicate}"]:
+            
+            if location_of_right_pair == "":
+                metadata[cultivar][condition][timepoints][f"biorep_{biological_replicate}"][f"techrep_{technical_replicate}"] = {"location_of_left_pair":location_of_left_pair}
+            else:
+                metadata[cultivar][condition][timepoints][f"biorep_{biological_replicate}"][f"techrep_{technical_replicate}"] = {"location_of_left_pair":location_of_left_pair, 
+                                                                                                                                 "location_of_right_pair":location_of_right_pair}
+    fhr.close()
+    logging.info( "Metadata file read" )
+    ##################################################################################################################################################################
+
+    ##################################################################################################################################################################
+    # Convert gff3 file to fasta
+    ##################################################################################################################################################################
+    logging.info( "Converting host transcriptome gff3 to fasta" )
+    
+    # Converting the host file
+    options.host_transcriptome_fasta = os.path.join( options.transcriptome_directory, 'host_transcriptome.fasta')
+    cmd  = f" gffread "
+    cmd += f" {options.host_transcriptome_gff3} "
+    cmd += f" -g {options.host_reference} "
+    cmd += f" -w {options.host_transcriptome_fasta}"
+    logging.info( f"Executing command: {cmd}" )
+    os.system( cmd )
+
+    # Converting the fungal file
+    options.fungal_transcriptome_fasta = os.path.join( options.transcriptome_directory, 'fungal_transcriptome.fasta')
+    cmd  = f" gffread "
+    cmd += f" {options.fungal_transcriptome_gff3} "
+    cmd += f" -g {options.fungal_reference} "
+    cmd += f" -w {options.fungal_transcriptome_fasta}"
+    logging.info( f"Executing command: {cmd}" )
+    os.system( cmd )
+
+    logging.info( "Host and fungal transcriptome fasta files created" )
+    ##################################################################################################################################################################
+
+    ##################################################################################################################################################################
+    # Create STAR index
+    ##################################################################################################################################################################
+    logging.info( "Creating STAR index" )
+
+    total_length_of_host_and_fungal_transcriptome = calculate_genome_length(options.host_transcriptome_fasta) + calculate_genome_length(options.fungal_transcriptome_fasta)
+    total_number_of_host_and_fungal_transcripts = calculate_number_of_sequences(options.host_transcriptome_fasta) + calculate_number_of_sequences(options.fungal_transcriptome_fasta)
+
+    # Calculate genomeSAindexNbases
+    options.genomeSAindexNbases = calculate_genomeSAindexNbases(total_length_of_host_and_fungal_transcriptome)
+    logging.info(f"genomeSAindexNbases: {options.genomeSAindexNbases}")
+
+    options.genomeChrBinNbits = calculate_genomeChrBinNbits(total_length_of_host_and_fungal_transcriptome)
+    logging.info(f"genomeChrBinNbits: {options.genomeChrBinNbits}")
+
+    # Create the STAR index
+    cmd  = f" STAR "
+    cmd += f" --runThreadN {options.cpu} "
+    cmd += f" --runMode genomeGenerate "
+    cmd += f" --genomeDir {options.star_index_directory} "
+    cmd += f" --genomeFastaFiles {options.host_transcriptome_fasta} {options.fungal_transcriptome_fasta} "
+    cmd += f" --genomeSAindexNbases {options.genomeSAindexNbases} "
+    cmd += f" --genomeChrBinNbits {options.genomeChrBinNbits} "
+    logging.info( f"Executing command: {cmd}" )
+    os.system( cmd )
+
+    logging.info( "STAR index created" )
+    ##################################################################################################################################################################
+
+    ##################################################################################################################################################################
+    # Align the reads
+    ##################################################################################################################################################################
+    logging.info( "Aligning the reads" )
+
+    for cultivar in metadata:
+        for condition in metadata[cultivar]:
+            for timepoints in metadata[cultivar][condition]:
+                for biological_replicate in metadata[cultivar][condition][timepoints]:
+                    all_left_reads = []
+                    all_right_reads = []
+                    
+                    for technical_replicate in metadata[cultivar][condition][timepoints][biological_replicate]:
+                        left_pair_location = metadata[cultivar][condition][timepoints][biological_replicate][technical_replicate]["location_of_left_pair"]
+                        all_left_reads.append(left_pair_location)
+                        if "location_of_right_pair" in metadata[cultivar][condition][timepoints][biological_replicate][technical_replicate]:
+                            right_pair_location = metadata[cultivar][condition][timepoints][biological_replicate][technical_replicate]["location_of_right_pair"]
+                            all_right_reads.append(right_pair_location)
+                        
+                    
+                    # Align the reads
+                    sample_specific_output_prefix = os.path.join( options.star_alignment_directory, "_".join([cultivar, condition, timepoints, biological_replicate]) )
+                    cmd  = f" STAR "
+                    cmd += f" --runThreadN {options.cpu} "
+                    cmd += f" --genomeDir {options.star_index_directory} "
+                    cmd += f" --readFilesIn {','.join(all_left_reads)} "
+                    if len(all_right_reads) > 0:
+                        cmd += f" {','.join(all_right_reads)} "
+                    cmd += f" --outFileNamePrefix {sample_specific_output_prefix}_ "
+                    cmd += f" --readFilesCommand zcat"
+                    cmd += f" --outSAMattrRGline "
+                    for technical_replicate in metadata[cultivar][condition][timepoints][biological_replicate]:
+                        cmd += f" ID:{cultivar}_{condition}_{timepoints}_{biological_replicate}_{technical_replicate} ,"
+                    cmd += f" --alignIntronMin 2 "
+                    cmd += f" --alignIntronMax 1 "
+                    cmd += f" --outFilterMultimapNmax 500 " # Maximum number of multiple alignments allowed for a read: if exceeded, the read is considered unmapped
+                    cmd += f" --outSAMtype BAM Unsorted "
+                    cmd += f" --outSAMunmapped Within"
+                    cmd += f" 1> {sample_specific_output_prefix}.output "
+                    cmd += f" 2> {sample_specific_output_prefix}.error"
+                    
+                    if os.path.exists(f"{sample_specific_output_prefix}_Aligned.out.bam"):
+                        logging.warning( f"Alignment already exists for {cultivar}, {condition}, {timepoints}, {biological_replicate}. Skipping")
+                    else:
+                        logging.info( f"Executing command: {cmd}" )
+                        os.system( cmd )
+
+                    metadata[cultivar][condition][timepoints][biological_replicate]["bam_file"] = f"{sample_specific_output_prefix}_Aligned.out.bam"
+                    metadata[cultivar][condition][timepoints][biological_replicate]["alignment_metrics"] = f"{sample_specific_output_prefix}_Log.final.out"
+
+                    logging.info( f"Reads aligned for {cultivar}, {condition}, {timepoints}, {biological_replicate}" )
+
+    logging.info( "Reads aligned" )
+    ##################################################################################################################################################################
+
+    ##################################################################################################################################################################
+    # Generate salmon counts
+    ##################################################################################################################################################################
+    logging.info( "Generating salmon counts" )
+
+    # Merge the two transcriptomes
+    options.merged_transcriptome_fasta = os.path.join( options.transcriptome_directory, 'merged_transcriptome.fasta')
+    cmd  = f" cat "
+    cmd += f" {options.host_transcriptome_fasta} "
+    cmd += f" {options.fungal_transcriptome_fasta} "
+    cmd += f" > {options.merged_transcriptome_fasta}"
+    logging.info( f"Executing command: {cmd}" )
+    os.system( cmd )
+
+    # Merge the two gff3 files
+    options.merged_transcriptome_gff3 = os.path.join( options.transcriptome_directory, 'merged_transcriptome.gff3')
+    cmd  = f" cat "
+    cmd += f" {options.host_transcriptome_gff3} "
+    cmd += f" {options.fungal_transcriptome_gff3} "
+    cmd += f" > {options.merged_transcriptome_gff3}"
+    logging.info( f"Executing command: {cmd}" )
+    os.system( cmd )
+
+    for cultivar in metadata:
+        for condition in metadata[cultivar]:
+            for timepoints in metadata[cultivar][condition]:
+                for biological_replicate in metadata[cultivar][condition][timepoints]:
+                    per_sample_salmon_counts_directory = os.path.join( options.salmon_counts_directory, '_'.join([cultivar, condition, timepoints, biological_replicate]) )
+                    cmd  = f" salmon quant "
+                    cmd += f" --targets {options.merged_transcriptome_fasta} "
+                    cmd += f" --libType A "
+                    cmd += f" --threads {options.cpu}"
+                    cmd += f" --geneMap {options.merged_transcriptome_gff3}"
+                    cmd += f" --alignments {metadata[cultivar][condition][timepoints][biological_replicate]['bam_file']}"
+                    cmd += f" --output {per_sample_salmon_counts_directory} "
+                    cmd += f" 1> {per_sample_salmon_counts_directory}.output "
+                    cmd += f" 2> {per_sample_salmon_counts_directory}.error"
+
+                    count_file = os.path.join(per_sample_salmon_counts_directory, "quant.genes.sf")
+                    if os.path.exists(count_file):
+                        logging.info( f"Counts already exist for {cultivar}, {condition}, {timepoints}, {biological_replicate}. Skipping")
+                    else:
+                        logging.info( f"Executing command: {cmd}" )
+                        os.system( cmd )
+
+                    metadata[cultivar][condition][timepoints][biological_replicate]["salmon_counts"] = count_file
+    
+    logging.info( "Salmon counts generated" )
+    ##################################################################################################################################################################
+
+    ##################################################################################################################################################################
+    # Merge counts into a single file
+    ##################################################################################################################################################################
+    logging.info( "Merging counts into a single file" )
+
+    all_salmon_counts = {}
+    for cultivar in metadata:
+        for condition in metadata[cultivar]:
+            for timepoints in metadata[cultivar][condition]:
+                for biological_replicate in metadata[cultivar][condition][timepoints]:
+                    count_file = metadata[cultivar][condition][timepoints][biological_replicate]["salmon_counts"]
+                    all_salmon_counts["_".join([cultivar, condition, timepoints, biological_replicate])] = {}
+                    with open(count_file, "r") as file:
+                        for line in file:
+                            if line.startswith("Name"): continue
+                            Name, length, eff_length, tpm, num_reads = line.strip().split("\t")
+                            all_salmon_counts["_".join([cultivar, condition, timepoints, biological_replicate])][Name] = tpm
+    
+    # Convert dictionary to pandas DataFrame
+    df = pd.DataFrame.from_dict(all_salmon_counts)
+
+    # Write DataFrame to file
+    output_file = os.path.join(options.output_directory, "salmon_counts.csv")
+    df.to_csv(output_file, index=False)
+
+    logging.info("Salmon counts written to file")
+
+    ##################################################################################################################################################################
+
+                    
+    
+
+if __name__ == "__main__":
+    main()
