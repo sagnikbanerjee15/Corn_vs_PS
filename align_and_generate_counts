@@ -25,7 +25,7 @@ def parseCommandLineArguments():
     required_named.add_argument( "--host_transcriptome_gff3", help = "Enter the name of the transcriptome file in gff3 format", required = True)
     required_named.add_argument( "--fungal_reference", help = "Enter the name of the fungal genome file in fasta format", required = True)
     required_named.add_argument( "--fungal_transcriptome_gff3", help = "Enter the name of the fungal transcriptome file in gff3 format", required = True)
-    required_named.add_argument( "--logfilename", help = "Enter the name of the logfile", required = True) )
+    required_named.add_argument( "--logfilename", help = "Enter the name of the logfile", required = True)
     #required_named.add_argument( "--gene_to_transcript_map", "--gene_to_transcript_map", help = "Enter the gene to transcript mapping", required = True)
 
     ##################################################################################################
