@@ -314,11 +314,11 @@ def main():
                             all_salmon_counts["_".join([cultivar, condition, timepoints, biological_replicate])][Name] = tpm
     
     # Convert dictionary to pandas DataFrame
-    df = pd.DataFrame.from_dict(all_salmon_counts, index = True)
+    df = pd.DataFrame.from_dict(all_salmon_counts)
 
     # Write DataFrame to file
     output_file = os.path.join(options.output_directory, "salmon_counts.csv")
-    df.to_csv(output_file, index=False)
+    df.to_csv(output_file)
 
     logging.info("Salmon counts written to file")
 
