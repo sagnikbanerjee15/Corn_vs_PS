@@ -59,7 +59,7 @@ def calculate_number_of_sequences(fasta_file):
 
 def calculate_genomeSAindexNbases(genome_length):
     # Calculate the value of genomeSAindexNbases
-    genomeSAindexNbases = min(14, int(math.log2(genome_length) * 2 - 1))
+    genomeSAindexNbases = min(14, int(math.log2(genome_length) / 2 - 1))
     return genomeSAindexNbases
 
 def calculate_genomeChrBinNbits(genome_length, total_number_of_host_and_fungal_transcripts):
