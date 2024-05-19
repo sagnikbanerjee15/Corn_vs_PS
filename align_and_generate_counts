@@ -64,7 +64,7 @@ def calculate_genomeSAindexNbases(genome_length):
 
 def calculate_genomeChrBinNbits(genome_length, total_number_of_host_and_fungal_transcripts):
     # Calculate the value of genomeChrBinNbits
-    genomeChrBinNbits = min(18,math.int(log2(genome_length/total_number_of_host_and_fungal_transcripts)))
+    genomeChrBinNbits = min(18,int(math.log2(genome_length/total_number_of_host_and_fungal_transcripts)))
     return genomeChrBinNbits
 
 def main():
