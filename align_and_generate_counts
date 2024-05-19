@@ -237,8 +237,10 @@ def main():
                     cmd += f" --outFileNamePrefix {sample_specific_output_prefix}_ "
                     cmd += f" --readFilesCommand zcat"
                     cmd += f" --outSAMattrRGline "
-                    for technical_replicate in metadata[cultivar][condition][timepoints][biological_replicate]:
-                        cmd += f" ID:{cultivar}_{condition}_{timepoints}_{biological_replicate}_{technical_replicate} ,"
+                    for num, technical_replicate in enumerate(metadata[cultivar][condition][timepoints][biological_replicate]):
+                        cmd += f" ID:{cultivar}_{condition}_{timepoints}_{biological_replicate}_{technical_replicate}"
+                        if num < len(metadata[cultivar][condition][timepoints][biological_replicate]) - 1:
+                            cmd += f","
                     cmd += f" --alignIntronMin 2 "
                     cmd += f" --alignIntronMax 1 "
                     cmd += f" --outFilterMultimapNmax 500 " # Maximum number of multiple alignments allowed for a read: if exceeded, the read is considered unmapped
