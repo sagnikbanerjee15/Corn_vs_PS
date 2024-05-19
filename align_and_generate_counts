@@ -59,12 +59,12 @@ def calculate_number_of_sequences(fasta_file):
 
 def calculate_genomeSAindexNbases(genome_length):
     # Calculate the value of genomeSAindexNbases
-    genomeSAindexNbases = math.min(14, int(math.log2(genome_length) * 2 - 1))
+    genomeSAindexNbases = min(14, int(math.log2(genome_length) * 2 - 1))
     return genomeSAindexNbases
 
-def calculate_genomeChrBinNbits(genome_length):
+def calculate_genomeChrBinNbits(genome_length, total_number_of_host_and_fungal_transcripts):
     # Calculate the value of genomeChrBinNbits
-    genomeChrBinNbits = math.min(18,math.log2(genome_length/total_number_of_host_and_fungal_transcripts))
+    genomeChrBinNbits = min(18,math.log2(genome_length/total_number_of_host_and_fungal_transcripts))
     return genomeChrBinNbits
 
 def main():
@@ -163,7 +163,7 @@ def main():
     options.genomeSAindexNbases = calculate_genomeSAindexNbases(total_length_of_host_and_fungal_transcriptome)
     logging.info(f"genomeSAindexNbases: {options.genomeSAindexNbases}")
 
-    options.genomeChrBinNbits = calculate_genomeChrBinNbits(total_length_of_host_and_fungal_transcriptome)
+    options.genomeChrBinNbits = calculate_genomeChrBinNbits(total_length_of_host_and_fungal_transcriptome, total_number_of_host_and_fungal_transcripts)
     logging.info(f"genomeChrBinNbits: {options.genomeChrBinNbits}")
 
     # Create the STAR index
