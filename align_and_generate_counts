@@ -159,6 +159,9 @@ def main():
     total_length_of_host_and_fungal_transcriptome = calculate_genome_length(options.host_transcriptome_fasta) + calculate_genome_length(options.fungal_transcriptome_fasta)
     total_number_of_host_and_fungal_transcripts = calculate_number_of_sequences(options.host_transcriptome_fasta) + calculate_number_of_sequences(options.fungal_transcriptome_fasta)
 
+    logging.info(f"Total length of host and fungal transcriptome: {total_length_of_host_and_fungal_transcriptome}")
+    logging.info(f"Total number of host and fungal transcripts: {total_number_of_host_and_fungal_transcripts}")
+
     # Calculate genomeSAindexNbases
     options.genomeSAindexNbases = calculate_genomeSAindexNbases(total_length_of_host_and_fungal_transcriptome)
     logging.info(f"genomeSAindexNbases: {options.genomeSAindexNbases}")
